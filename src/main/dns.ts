@@ -1,0 +1,92 @@
+import dns from "node:dns/promises";
+import { isIP } from "node:net";
+
+export interface ResolvedHost {
+  ip: string;
+  family: 4 | 6;
+  originalName: string;
+}
+
+export async function resolveHostnameWithTimeout(
+  hostname: string,
+  preferredFamily: 4 | 6 = 4,
+  timeoutMs = 3000
+): Promise<ResolvedHost | null> {
+  const cleanHost = hostname.trim();
+
+  // If already an IP address, return immediately
+  const ipType = isIP(cleanHost);
+  if (ipType === 4 || ipType === 6) {
+    return {
+      ip: cleanHost,
+      family: ipType,
+      originalName: cleanHost,
+    };
+  }
+
+  // Handle IDN (internationalized domain names) via URL or punycode domain conversion
+  let asciiDomain = cleanHost;
+  try {
+    const url = new URL(`http://${cleanHost}`);
+    asciiDomain = url.hostname;
+  } catch {
+    // If not a valid URL format, keep original
+  }
+
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("DNS query timeout")), timeoutMs)
+  );
+
+  try {
+    const lookupPromise = (async () => {
+      // Lookup both A and AAAA
+      let v4: string | null = null;
+      let v6: string | null = null;
+
+      try {
+        const res4 = await dns.resolve4(asciiDomain);
+        if (res4 && res4.length > 0) v4 = res4[0] ?? null;
+      } catch {
+        // Ignore
+      }
+
+      try {
+        const res6 = await dns.resolve6(asciiDomain);
+        if (res6 && res6.length > 0) v6 = res6[0] ?? null;
+      } catch {
+        // Ignore
+      }
+
+      if (preferredFamily === 6 && v6) {
+        return { ip: v6, family: 6 as const, originalName: cleanHost };
+      }
+      if (preferredFamily === 4 && v4) {
+        return { ip: v4, family: 4 as const, originalName: cleanHost };
+      }
+      if (v6) {
+        return { ip: v6, family: 6 as const, originalName: cleanHost };
+      }
+      if (v4) {
+        return { ip: v4, family: 4 as const, originalName: cleanHost };
+      }
+      return null;
+    })();
+
+    return await Promise.race([lookupPromise, timeoutPromise]);
+  } catch {
+    return null;
+  }
+}
+
+export async function lookupReverseDns(ipStr: string, timeoutMs = 3000): Promise<string | null> {
+  const timeoutPromise = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error("Reverse DNS timeout")), timeoutMs)
+  );
+
+  try {
+    const revPromise = dns.reverse(ipStr).then((res) => (res && res.length > 0 ? res[0] ?? null : null));
+    return await Promise.race([revPromise, timeoutPromise]);
+  } catch {
+    return null;
+  }
+}
