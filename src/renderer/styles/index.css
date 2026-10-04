@@ -1,5 +1,7 @@
 :root {
-  --font-sans: "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-sans:
+    "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+    sans-serif;
   --font-mono: "JetBrains Mono", "SF Mono", Monaco, Menlo, Consolas, monospace;
 
   /* Dark theme (default) */
@@ -78,7 +80,8 @@
   padding: 0;
 }
 
-html, body {
+html,
+body {
   height: 100%;
   margin: 0;
   padding: 0;
@@ -227,7 +230,8 @@ html, body {
 }
 
 .btn-calculate {
-  background: linear-gradient(135deg, #0284c7, #0369a1);
+  background-color: #0369a1;
+  background-image: linear-gradient(135deg, #0369a1, #075985);
   color: #ffffff;
   border: none;
   border-radius: var(--radius-sm);
@@ -240,7 +244,7 @@ html, body {
   align-items: center;
   gap: 6px;
   transition: all 0.15s ease;
-  box-shadow: 0 2px 8px rgba(2, 132, 199, 0.35);
+  box-shadow: 0 2px 8px rgba(3, 105, 161, 0.35);
 }
 
 .btn-calculate:hover {
@@ -315,8 +319,8 @@ html, body {
 
 /* Error banner */
 .error-banner {
-  background: rgba(220, 38, 38, 0.2);
-  border: 1px solid rgba(239, 68, 68, 0.45);
+  background-color: #2b1114;
+  border: 1px solid #ef4444;
   color: #fee2e2;
   padding: 6px 10px;
   border-radius: var(--radius-sm);
@@ -325,6 +329,12 @@ html, body {
   display: flex;
   align-items: center;
   gap: 6px;
+}
+
+[data-theme="light"] .error-banner {
+  background-color: #fef2f2;
+  border: 1px solid #ef4444;
+  color: #991b1b;
 }
 
 /* Main Content Two-Column Layout */
@@ -668,15 +678,26 @@ html, body {
 }
 
 /* Modal */
+dialog.modal-overlay,
 .modal-overlay {
   position: fixed;
   inset: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  border: none;
   background: rgba(0, 0, 0, 0.7);
   backdrop-filter: blur(4px);
   display: flex;
   align-items: center;
   justify-content: center;
   z-index: 1000;
+  color: inherit;
+}
+
+dialog.modal-overlay::backdrop {
+  background: transparent;
 }
 
 .modal-content {

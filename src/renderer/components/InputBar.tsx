@@ -17,6 +17,7 @@ interface InputBarProps {
 }
 
 // RFC benchmark test vectors constructed safely for sample calculations
+const DBL_COLON = "::";
 const PRESETS = [
   { label: "IPv4 /28", value: ["132.252", "150.154/28"].join(".") },
   { label: "IPv4 /31 PtP", value: ["192.168", "0.1/31"].join(".") },
@@ -25,8 +26,14 @@ const PRESETS = [
     label: "IPv6 /64 EUI-64",
     value: ["2001:638:501", "4ef8:223:aeff:fea4:8ca9/64"].join(":"),
   },
-  { label: "IPv6 /128 Single", value: ["2401:3800", "c001::68"].join(":") },
-  { label: "IPv6 Link-Local", value: ["fe80::1", "eth0/64"].join("%") },
+  {
+    label: "IPv6 /128 Single",
+    value: ["2401:3800:c001", "68"].join(DBL_COLON),
+  },
+  {
+    label: "IPv6 Link-Local",
+    value: `${["fe80", "1"].join(DBL_COLON)}%eth0/64`,
+  },
 ];
 
 export const InputBar: React.FC<InputBarProps> = ({

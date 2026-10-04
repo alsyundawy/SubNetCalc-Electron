@@ -15,11 +15,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      open
       aria-labelledby="about-modal-title"
-      tabIndex={-1}
       className="modal-overlay"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -44,21 +42,27 @@ export const AboutModal: React.FC<AboutModalProps> = ({
               About SubNetCalc-Electron
             </div>
           </div>
-          <button className="btn-icon" onClick={onClose} aria-label="Close dialog">
+          <button
+            className="btn-icon"
+            onClick={onClose}
+            aria-label="Close dialog"
+          >
             ✕
           </button>
         </div>
 
         <div className="modal-body">
           <p>
-            <strong>SubNetCalc-Electron</strong> is a high-precision IPv4 and IPv6 Subnet
-            Calculator desktop application designed with modern engineering standards and
-            an interactive user interface.
+            <strong>SubNetCalc-Electron</strong> is a high-precision IPv4 and
+            IPv6 Subnet Calculator desktop application designed with modern
+            engineering standards and an interactive user interface.
           </p>
 
           <p>
-            <strong>Version:</strong> v{version || "1.0.0"}<br />
-            <strong>License:</strong> MIT License<br />
+            <strong>Version:</strong> v{version || "1.0.0"}
+            <br />
+            <strong>License:</strong> MIT License
+            <br />
             <strong>Engine:</strong> Pure TypeScript Calculation Engine
           </p>
 
@@ -72,8 +76,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({
           >
             <strong>Upstream Attribution:</strong>
             <p style={{ marginTop: "4px" }}>
-              Inspired by the algorithmic behavior, network properties, and output format of the
-              canonical <strong>SubNetCalc</strong> CLI tool authored by <strong>Dr. Thomas Dreibholz</strong>.
+              Inspired by the algorithmic behavior, network properties, and
+              output format of the canonical <strong>SubNetCalc</strong> CLI
+              tool authored by <strong>Dr. Thomas Dreibholz</strong>.
             </p>
             <p style={{ marginTop: "6px" }}>
               Upstream Project:{" "}
@@ -88,8 +93,9 @@ export const AboutModal: React.FC<AboutModalProps> = ({
           </div>
 
           <p>
-            Supported Standards: RFC 791 (IPv4), RFC 4291 (IPv6 Architecture), RFC 4193
-            (Unique Local IPv6), RFC 5952 (Canonical IPv6 Format), RFC 3021 (31-bit PtP Links).
+            Supported Standards: RFC 791 (IPv4), RFC 4291 (IPv6 Architecture),
+            RFC 4193 (Unique Local IPv6), RFC 5952 (Canonical IPv6 Format), RFC
+            3021 (31-bit PtP Links).
           </p>
         </div>
 
@@ -99,6 +105,6 @@ export const AboutModal: React.FC<AboutModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

@@ -45,7 +45,9 @@
 > High-performance networking suite for macOS and cross-platform desktop, featuring pure TypeScript subnet engine calculation, 100% test oracle parity with upstream `dreibh/subnetcalc`, strict WCAG AAA color contrast, and zero-leak memory watcher governance.
 >
 > 🍏 **[`Latest Releases (v1.0.0)`](https://github.com/alsyundawy/SubNetCalc-Electron/releases/latest)** &nbsp;|&nbsp;
-> 📜 **[`Upstream Repository (@dreibh)`](https://github.com/dreibh/subnetcalc)** &nbsp;|&nbsp;
+> 📖 **[`Release DocNotes`](DOCNOTE.md)** &nbsp;|&nbsp;
+> 📜 **[`Changelog`](CHANGELOG.md)** &nbsp;|&nbsp;
+> 🏠 **[`Upstream Repository (@dreibh)`](https://github.com/dreibh/subnetcalc)** &nbsp;|&nbsp;
 > 🐛 **[`Issue Tracker`](https://github.com/alsyundawy/SubNetCalc-Electron/issues)** &nbsp;|&nbsp;
 > 💖 **[`Support via PayPal`](https://www.paypal.me/alsyundawy)**
 
@@ -73,6 +75,7 @@
 - [macOS Gatekeeper & Quarantine Removal](#macos-gatekeeper--quarantine-removal)
 - [Developer Setup & Quality Verification](#developer-setup--quality-verification)
 - [13-Pillar Code Review & Quality Report](#13-pillar-code-review--quality-report)
+- [Release DocNotes (DOCNOTE.md)](DOCNOTE.md)
 - [Changelog (v1.0.0)](#changelog-v100)
 - [Upstream Credits & Attribution](#upstream-credits--attribution)
 - [FAQ & Troubleshooting](#faq--troubleshooting)
@@ -97,16 +100,16 @@ Traditional subnet calculators often suffer from major limitations: they are eit
 
 ## Key Features & Capabilities Matrix
 
-| Capability | Technical Implementation | Benefit |
-| :--- | :--- | :--- |
-| **Pure TypeScript Subnet Engine** | Synchronous bitwise arithmetic with 128-bit `BigInt` precision and zero external calculation libraries. | 100% offline functionality, immediate keystroke recalculation, and identical outputs to upstream CLI. |
-| **Binary Bit Visualizer** | Interactive rendered grid mapping network prefix bits (Cyan) vs. host bits (Amber) across 4 octets (IPv4) or 8 hextets (IPv6). | Instant visual clarity on bit boundary divisions and subnet sizing without manual calculation. |
-| **RFC 3021 /31 PtP Support** | Automatic recognition of 31-bit IPv4 subnets without broadcast address allocation. | Accurate host provisioning for modern point-to-point router links. |
-| **RFC 4193 Unique Local IPv6 (ULA)** | Cryptographically secure pseudo-random Global ID generation using OS random bytes. | Generates standards-compliant `fd00::/8` non-routable private subnets on demand. |
-| **Asynchronous Reverse DNS** | Non-blocking PTR lookup through Node.js asynchronous DNS resolver with timeout clearance. | Displays canonical hostnames without freezing calculation rendering or leaking timer handles. |
-| **Local Offline GeoIP Lookup** | MaxMind MMDB binary parser bundled self-contained into the main bundle with zero native C/C++ addons. | Pinpoints country code and location from local databases without telemetry or external tracking. |
-| **Two-Column Compact Dashboard** | CSS Grid dashboard with metric cards on the left and tabbed attributes & calculation history on the right. | Perfectly fixed viewport with zero outer window scrolling on any desktop display. |
-| **1-Click Export Tools** | Instant clipboard copying for CLI plain-text formats or complete structured JSON schemas. | Effortless integration into network configuration scripts, automation pipelines, and ticketing systems. |
+| Capability                           | Technical Implementation                                                                                                       | Benefit                                                                                                 |
+| :----------------------------------- | :----------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| **Pure TypeScript Subnet Engine**    | Synchronous bitwise arithmetic with 128-bit `BigInt` precision and zero external calculation libraries.                        | 100% offline functionality, immediate keystroke recalculation, and identical outputs to upstream CLI.   |
+| **Binary Bit Visualizer**            | Interactive rendered grid mapping network prefix bits (Cyan) vs. host bits (Amber) across 4 octets (IPv4) or 8 hextets (IPv6). | Instant visual clarity on bit boundary divisions and subnet sizing without manual calculation.          |
+| **RFC 3021 /31 PtP Support**         | Automatic recognition of 31-bit IPv4 subnets without broadcast address allocation.                                             | Accurate host provisioning for modern point-to-point router links.                                      |
+| **RFC 4193 Unique Local IPv6 (ULA)** | Cryptographically secure pseudo-random Global ID generation using OS random bytes.                                             | Generates standards-compliant `fd00::/8` non-routable private subnets on demand.                        |
+| **Asynchronous Reverse DNS**         | Non-blocking PTR lookup through Node.js asynchronous DNS resolver with timeout clearance.                                      | Displays canonical hostnames without freezing calculation rendering or leaking timer handles.           |
+| **Local Offline GeoIP Lookup**       | MaxMind MMDB binary parser bundled self-contained into the main bundle with zero native C/C++ addons.                          | Pinpoints country code and location from local databases without telemetry or external tracking.        |
+| **Two-Column Compact Dashboard**     | CSS Grid dashboard with metric cards on the left and tabbed attributes & calculation history on the right.                     | Perfectly fixed viewport with zero outer window scrolling on any desktop display.                       |
+| **1-Click Export Tools**             | Instant clipboard copying for CLI plain-text formats or complete structured JSON schemas.                                      | Effortless integration into network configuration scripts, automation pipelines, and ticketing systems. |
 
 ---
 
@@ -174,10 +177,10 @@ To ensure minimal CPU impact and long battery life on MacBook systems:
 
 Official signed and verified application binaries for macOS:
 
-| Target Architecture | Package Type | Minimum OS | File Artifact Name | File Size | SHA-256 Digest |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Apple Silicon (ARM64)** | `.dmg` Installer | macOS 12+ | `SubNetCalc-1.0.0-arm64.dmg` | 113 MiB | `070c400c07deac2875c954a4845ececd9d29983f0325892480d3883c35e3c8be` |
-| **Intel x64** | `.dmg` Installer | macOS 12+ | `SubNetCalc-1.0.0.dmg` | 116 MiB | `61c07dae2ebf2147c5880dbdbabc30783ec381c09cb61602d40e7264b9e616f0` |
+| Target Architecture       | Package Type     | Minimum OS | File Artifact Name           | File Size | SHA-256 Digest                                                     |
+| :------------------------ | :--------------- | :--------- | :--------------------------- | :-------- | :----------------------------------------------------------------- |
+| **Apple Silicon (ARM64)** | `.dmg` Installer | macOS 12+  | `SubNetCalc-1.0.0-arm64.dmg` | 113 MiB   | `c79a59a98c044026f1338f4722f51dbaacb8d2b96de6f12aecafb6b5094ff36b` |
+| **Intel x64**             | `.dmg` Installer | macOS 12+  | `SubNetCalc-1.0.0.dmg`       | 116 MiB   | `7390f1dd45d975f8616ccced7019ee4fb6b5e305872d552f47f5949cbf879eb1` |
 
 ---
 
