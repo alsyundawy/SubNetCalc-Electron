@@ -3,14 +3,14 @@
     "target": "ES2022",
     "module": "CommonJS",
     "declaration": true,
+    "rootDir": "./src/engine",
     "outDir": "dist-electron/engine",
     "strict": true,
     "noUncheckedIndexedAccess": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
-    "baseUrl": ".",
     "paths": {
-      "@engine/*": ["src/engine/*"]
+      "@engine/*": ["./src/engine/*"]
     }
   },
   "include": ["src/engine/**/*"]

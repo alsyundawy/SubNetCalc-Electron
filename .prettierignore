@@ -1,0 +1,5 @@
+dist
+dist-electron
+build/*.icns
+build/*.ico
+src/renderer/index.html

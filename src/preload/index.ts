@@ -1,24 +1,30 @@
 import { contextBridge, ipcRenderer } from "electron";
-import type { CalculateRequest, CalculateResult } from "../engine/types.js";
+import type { GeoInfo } from "../engine/types.js";
 
-export interface IpcResponse<T> {
-  ok: boolean;
-  data?: T;
-  error?: string;
+export interface ResolvedHostInfo {
+  ip: string;
+  family: 4 | 6;
+  originalName: string;
 }
 
 export interface SubNetCalcApi {
-  ping: () => Promise<string>;
   getAppVersion: () => Promise<string>;
-  calculate: (req: CalculateRequest) => Promise<IpcResponse<CalculateResult>>;
-  formatPlainText: (result: CalculateResult) => Promise<string>;
+  resolveHostname: (
+    hostname: string,
+    preferredFamily?: 4 | 6,
+  ) => Promise<ResolvedHostInfo | null>;
+  lookupReverseDns: (ipStr: string) => Promise<string | null>;
+  lookupGeoIP: (ipStr: string) => Promise<GeoInfo | null>;
+  getRandomBytes: (length: number) => Promise<number[]>;
 }
 
 const api: SubNetCalcApi = {
-  ping: () => ipcRenderer.invoke("ping"),
   getAppVersion: () => ipcRenderer.invoke("get-app-version"),
-  calculate: (req: CalculateRequest) => ipcRenderer.invoke("calculate", req),
-  formatPlainText: (result: CalculateResult) => ipcRenderer.invoke("format-plain-text", result),
+  resolveHostname: (hostname, preferredFamily = 4) =>
+    ipcRenderer.invoke("resolve-hostname", hostname, preferredFamily),
+  lookupReverseDns: (ipStr) => ipcRenderer.invoke("lookup-reverse-dns", ipStr),
+  lookupGeoIP: (ipStr) => ipcRenderer.invoke("lookup-geoip", ipStr),
+  getRandomBytes: (length) => ipcRenderer.invoke("get-random-bytes", length),
 };
 
 contextBridge.exposeInMainWorld("subnetcalc", api);

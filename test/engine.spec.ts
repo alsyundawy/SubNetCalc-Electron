@@ -1,8 +1,6 @@
 import { describe, it, expect } from "vitest";
 import {
   parseSubnetInput,
-  isContiguousMask32,
-  isContiguousMask128,
   calculateIPv4,
   calculateIPv6,
   generateUniqueLocal,
@@ -42,8 +40,12 @@ describe("T1: Subnet Input Parser", () => {
   });
 
   it("should reject non-contiguous netmasks", () => {
-    expect(() => parseSubnetInput("192.168.1.1/255.0.255.0")).toThrow("Non-contiguous");
-    expect(() => parseSubnetInput("2001:db8::1/ffff:0:ffff::")).toThrow("Non-contiguous");
+    expect(() => parseSubnetInput("192.168.1.1/255.0.255.0")).toThrow(
+      "Non-contiguous",
+    );
+    expect(() => parseSubnetInput("2001:db8::1/ffff:0:ffff::")).toThrow(
+      "Non-contiguous",
+    );
   });
 
   it("should reject out-of-range prefixes", () => {
@@ -125,8 +127,18 @@ describe("T2: IPv4 Engine", () => {
   it("should handle multicast 224.0.0.1/24", () => {
     const res = calculateIPv4("224.0.0.1", 24);
     expect(res.role).toBe("multicast");
-    expect(res.properties.some((p) => p.key === "Multicast Scope" && p.value === "link-local")).toBe(true);
-    expect(res.properties.some((p) => p.key === "Corresponding Multicast MAC" && p.value === "01:00:5e:00:00:01")).toBe(true);
+    expect(
+      res.properties.some(
+        (p) => p.key === "Multicast Scope" && p.value === "link-local",
+      ),
+    ).toBe(true);
+    expect(
+      res.properties.some(
+        (p) =>
+          p.key === "Corresponding Multicast MAC" &&
+          p.value === "01:00:5e:00:00:01",
+      ),
+    ).toBe(true);
   });
 });
 
@@ -146,10 +158,14 @@ describe("T3: IPv6 Engine", () => {
     const iid = res.properties.find((p) => p.key === "Interface ID")?.value;
     expect(iid).toBe("0223:aeff:fea4:8ca9");
 
-    const mac = res.properties.find((p) => p.key === "MAC Address (from EUI-64)")?.value;
+    const mac = res.properties.find(
+      (p) => p.key === "MAC Address (from EUI-64)",
+    )?.value;
     expect(mac).toBe("00:23:ae:a4:8c:a9");
 
-    const sn = res.properties.find((p) => p.key === "Solicited-Node Multicast")?.value;
+    const sn = res.properties.find(
+      (p) => p.key === "Solicited-Node Multicast",
+    )?.value;
     expect(sn).toBe("ff02::1:ffa4:8ca9");
   });
 
@@ -168,7 +184,9 @@ describe("T3: IPv6 Engine", () => {
     const iid = res.properties.find((p) => p.key === "Interface ID")?.value;
     expect(iid).toBe("0000:0000:0000:0068");
 
-    const sn = res.properties.find((p) => p.key === "Solicited-Node Multicast")?.value;
+    const sn = res.properties.find(
+      (p) => p.key === "Solicited-Node Multicast",
+    )?.value;
     expect(sn).toBe("ff02::1:ff00:0068");
   });
 });
@@ -176,14 +194,20 @@ describe("T3: IPv6 Engine", () => {
 describe("T4: Unique Local IPv6 & Formatter", () => {
   it("should generate deterministic ULA with injected RNG matching upstream", () => {
     const bytes5 = new Uint8Array([0x5b, 0xec, 0xa5, 0xf4, 0xb3]);
-    const ula = generateUniqueLocal("2001:638:501:4ef8:223:aeff:fea4:8ca9", bytes5);
+    const ula = generateUniqueLocal(
+      "2001:638:501:4ef8:223:aeff:fea4:8ca9",
+      bytes5,
+    );
     expect(ula.address).toBe("fd5b:eca5:f4b3:4ef8:223:aeff:fea4:8ca9");
     expect(ula.globalIdHex).toBe("5beca5f4b3");
     expect(ula.subnetIdHex).toBe("4ef8");
 
     const res = calculateSubnet(
-      { input: "2001:638:501:4ef8:223:aeff:fea4:8ca9/64", uniqueLocal: "standard" },
-      bytes5
+      {
+        input: "2001:638:501:4ef8:223:aeff:fea4:8ca9/64",
+        uniqueLocal: "standard",
+      },
+      bytes5,
     );
     expect(res.address).toBe("fd5b:eca5:f4b3:4ef8:223:aeff:fea4:8ca9");
     expect(res.network).toBe("fd5b:eca5:f4b3:4ef8::");
@@ -192,7 +216,10 @@ describe("T4: Unique Local IPv6 & Formatter", () => {
   it("should reject ULA generation for IPv4", () => {
     const bytes5 = new Uint8Array(5);
     expect(() =>
-      calculateSubnet({ input: "192.168.1.1/24", uniqueLocal: "standard" }, bytes5)
+      calculateSubnet(
+        { input: "192.168.1.1/24", uniqueLocal: "standard" },
+        bytes5,
+      ),
     ).toThrow("not valid for IPv4");
   });
 
@@ -204,7 +231,9 @@ describe("T4: Unique Local IPv6 & Formatter", () => {
     expect(text).toContain("Netmask        = 255.255.255.240");
     expect(text).toContain("Broadcast      = 132.252.150.159");
     expect(text).toContain("Max. Hosts     = 14   (2^4 - 2)");
-    expect(text).toContain("Host Range     = { 132.252.150.145 - 132.252.150.158 }");
+    expect(text).toContain(
+      "Host Range     = { 132.252.150.145 - 132.252.150.158 }",
+    );
     expect(text).toContain("Class B");
   });
 });

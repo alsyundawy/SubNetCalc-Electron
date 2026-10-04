@@ -35,16 +35,13 @@ const testCases = [
   "2001:4860:4860::8888/32",
 ];
 
-describe("T7.2: Upstream CLI Oracle Comparison", () => {
-  if (!subnetcalcPath) {
-    it.skip("subnetcalc binary not found in PATH, skipping oracle test suite", () => {});
-    return;
-  }
-
+describe.skipIf(!subnetcalcPath)("T7.2: Upstream CLI Oracle Comparison", () => {
   for (const tc of testCases) {
     it(`should match upstream CLI calculation for ${tc}`, () => {
       // Run upstream CLI with -n to disable DNS lookups
-      const stdout = execSync(`${subnetcalcPath} ${tc} -n`, { encoding: "utf8" });
+      const stdout = execSync(`${subnetcalcPath} ${tc} -n`, {
+        encoding: "utf8",
+      });
 
       const parsedCli: Record<string, string> = {};
       for (const line of stdout.split("\n")) {

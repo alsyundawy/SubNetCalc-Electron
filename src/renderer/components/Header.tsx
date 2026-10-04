@@ -1,4 +1,5 @@
 import React from "react";
+import appIcon from "../assets/icon.png";
 
 interface HeaderProps {
   version: string;
@@ -16,10 +17,14 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="app-header">
       <div className="brand-section">
-        <div className="brand-logo">SN</div>
+        <img
+          src={appIcon}
+          alt="SubNetCalc Logo"
+          className="brand-logo-img"
+        />
         <div>
           <div className="brand-title">
-            SubNetCalc
+            SubNetCalc{" "}
             <span className="brand-badge">v{version || "1.0.0"}</span>
           </div>
           <div style={{ fontSize: "11px", color: "var(--text-dim)" }}>

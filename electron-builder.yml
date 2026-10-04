@@ -2,12 +2,19 @@ appId: com.alsyundawy.subnetcalc
 productName: SubNetCalc
 directories:
   output: release
+compression: maximum
+removePackageScripts: true
+removePackageKeywords: true
+asar: true
 files:
-  - "dist/**/*"
-  - "dist-electron/**/*"
-  - "package.json"
+  - dist/**/*
+  - dist-electron/**/*
+  - package.json
   - "!node_modules"
   - "!test/**/*"
+  - "!*.mmdb"
+  - "!*.csv"
+  - "!**/*.map"
 mac:
   category: public.app-category.developer-tools
   target:

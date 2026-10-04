@@ -15,12 +15,12 @@ export const BitVisualizer: React.FC<BitVisualizerProps> = ({ result }) => {
     const octets = result.bits.grouped; // ["10000100", ...]
 
     return octets.map((oct, octIndex) => {
-      const bitCells = oct.split("").map((b, bIdx) => {
+      const bitCells = oct.split("").map((b) => {
         const isNetwork = currentBitIndex < prefix;
         currentBitIndex++;
         return (
           <div
-            key={bIdx}
+            key={`v4-bit-${currentBitIndex}`}
             className={`bit-cell ${isNetwork ? "network" : "host"}`}
             title={`Bit ${currentBitIndex}: ${isNetwork ? "Network bit" : "Host bit"}`}
           >
@@ -30,7 +30,7 @@ export const BitVisualizer: React.FC<BitVisualizerProps> = ({ result }) => {
       });
 
       return (
-        <div key={octIndex} className="bit-octet-box">
+        <div key={`v4-oct-${octIndex + 1}`} className="bit-octet-box">
           <div className="bit-octet-label">Octet {octIndex + 1}</div>
           <div className="bit-octet-digits">{bitCells}</div>
         </div>
@@ -47,14 +47,14 @@ export const BitVisualizer: React.FC<BitVisualizerProps> = ({ result }) => {
       const hexLabel = parts[0]?.trim() || `Hextet ${hIndex + 1}`;
       const rawBits = (parts[1]?.replace(/\s+/g, "") || "").trim();
 
-      const cells = rawBits.split("").map((b, bIdx) => {
+      const cells = rawBits.split("").map((b) => {
         const isNetwork = currentBitIndex < prefix;
         currentBitIndex++;
         return (
           <div
-            key={bIdx}
+            key={`v6-bit-${currentBitIndex}`}
             className={`bit-cell ${isNetwork ? "network" : "host"}`}
-            style={{ width: "13px", height: "18px", fontSize: "10px" }}
+            style={{ width: "11px", height: "15px", fontSize: "8.5px" }}
             title={`Bit ${currentBitIndex}: ${isNetwork ? "Network bit" : "Host bit"}`}
           >
             {b}
@@ -63,7 +63,7 @@ export const BitVisualizer: React.FC<BitVisualizerProps> = ({ result }) => {
       });
 
       return (
-        <div key={hIndex} className="bit-octet-box" style={{ marginBottom: "6px" }}>
+        <div key={`v6-hex-${hexLabel}-${hIndex}`} className="bit-octet-box" style={{ marginBottom: "2px" }}>
           <div className="bit-octet-label" style={{ fontFamily: "var(--font-mono)" }}>
             {hexLabel}
           </div>

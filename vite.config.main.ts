@@ -2,6 +2,9 @@ import { defineConfig } from "vite";
 import path from "node:path";
 
 export default defineConfig({
+  ssr: {
+    noExternal: ["maxmind", "mmdb-lib", "tiny-lru"],
+  },
   build: {
     target: "node20",
     outDir: "dist-electron/main",
@@ -10,10 +13,19 @@ export default defineConfig({
     lib: {
       entry: "src/main/index.ts",
       formats: ["cjs"],
-      fileName: () => "index.cjs",
+      fileName: () => "index.js",
     },
     rollupOptions: {
-      external: ["electron", "maxmind", "node:net", "node:dns", "node:dns/promises", "node:crypto", "node:path", "node:fs", "node:url"],
+      external: [
+        "electron",
+        "node:net",
+        "node:dns",
+        "node:dns/promises",
+        "node:crypto",
+        "node:path",
+        "node:fs",
+        "node:url",
+      ],
     },
   },
   resolve: {

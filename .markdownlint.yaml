@@ -1,0 +1,8 @@
+# Markdownlint configuration
+MD013: false
+MD033:
+  allowed_elements:
+    - p
+    - img
+    - br
+    - strong

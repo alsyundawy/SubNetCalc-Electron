@@ -9,6 +9,21 @@ export default defineConfig({
   build: {
     outDir: "../../dist",
     emptyOutDir: true,
+    minify: true,
+    cssMinify: true,
+    sourcemap: false,
+    rollupOptions: {
+      output: {
+        manualChunks(id) {
+          if (
+            id.includes("node_modules/react") ||
+            id.includes("node_modules/react-dom")
+          ) {
+            return "vendor";
+          }
+        },
+      },
+    },
   },
   resolve: {
     alias: {

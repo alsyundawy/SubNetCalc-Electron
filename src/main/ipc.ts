@@ -1,107 +1,54 @@
 import { ipcMain, app } from "electron";
 import crypto from "node:crypto";
-import { CalculateRequest, CalculateResult } from "@engine/types.js";
-import { calculateSubnet, parseSubnetInput, formatResultPlainText } from "@engine/index.js";
-import { resolveHostnameWithTimeout, lookupReverseDns } from "./dns.js";
+import { GeoInfo } from "@engine/types.js";
+import {
+  resolveHostnameWithTimeout,
+  lookupReverseDns,
+  ResolvedHost,
+} from "./dns.js";
 import { initGeoIP, lookupGeoIP } from "./geoip.js";
 
-export type IpcResponse<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: string };
-
+/**
+ * Registers low-footprint IPC handlers once during application startup.
+ * Pure calculations and plain text formatting execute locally in the renderer,
+ * leaving IPC exclusively for system, network, and native crypto capabilities.
+ */
 export function registerIpcHandlers(): void {
-  ipcMain.handle("ping", async (): Promise<string> => {
-    return "pong";
-  });
-
-  ipcMain.handle("get-app-version", async (): Promise<string> => {
+  ipcMain.handle("get-app-version", (): string => {
     return app.getVersion();
   });
 
   ipcMain.handle(
-    "calculate",
+    "resolve-hostname",
     async (
       _event,
-      req: CalculateRequest
-    ): Promise<IpcResponse<CalculateResult>> => {
-      try {
-        if (!req || typeof req.input !== "string" || !req.input.trim()) {
-          return { ok: false, error: "Please enter a valid IP address or CIDR notation." };
-        }
-
-        // Initialize GeoIP if needed
-        if (req.geoip) {
-          await initGeoIP();
-        }
-
-        // Check if input is a hostname that needs resolution
-        let effectiveInput = req.input.trim();
-        let dnsHostname: string | null = null;
-        let dnsError: string | undefined;
-
-        // Extract address portion
-        const parts = effectiveInput.split(/[\/\s]/);
-        const hostPart = parts[0]!;
-        const remainder = effectiveInput.substring(hostPart.length);
-
-        const resolved = await resolveHostnameWithTimeout(hostPart);
-        if (resolved && resolved.ip !== hostPart) {
-          dnsHostname = hostPart;
-          effectiveInput = resolved.ip + remainder;
-        }
-
-        // RNG 5 bytes for ULA if requested
-        let rngBytes: Uint8Array | undefined;
-        if (req.uniqueLocal) {
-          rngBytes = crypto.randomBytes(5);
-        }
-
-        const result = calculateSubnet(
-          {
-            ...req,
-            input: effectiveInput,
-          },
-          rngBytes
-        );
-
-        // Reverse DNS lookup if requested
-        if (req.reverseDns) {
-          const revName = await lookupReverseDns(result.address);
-          if (revName) {
-            result.dns = { hostname: revName };
-          } else {
-            result.dns = { hostname: dnsHostname, error: "No PTR record found or request timed out" };
-          }
-        } else if (dnsHostname) {
-          result.dns = { hostname: dnsHostname };
-        }
-
-        // GeoIP lookup if requested
-        if (req.geoip) {
-          const geo = lookupGeoIP(result.address);
-          if (geo) {
-            result.geo = geo;
-          } else {
-            result.warnings.push("GeoIP MMDB database not found in userData directory");
-          }
-        }
-
-        return { ok: true, data: result };
-      } catch (err: unknown) {
-        const message = err instanceof Error ? err.message : String(err);
-        return { ok: false, error: message };
-      }
-    }
+      hostname: string,
+      preferredFamily: 4 | 6 = 4,
+    ): Promise<ResolvedHost | null> => {
+      if (!hostname || typeof hostname !== "string") return null;
+      return resolveHostnameWithTimeout(hostname, preferredFamily);
+    },
   );
 
   ipcMain.handle(
-    "format-plain-text",
-    async (_event, result: CalculateResult): Promise<string> => {
-      try {
-        return formatResultPlainText(result);
-      } catch {
-        return "";
-      }
-    }
+    "lookup-reverse-dns",
+    async (_event, ipStr: string): Promise<string | null> => {
+      if (!ipStr || typeof ipStr !== "string") return null;
+      return lookupReverseDns(ipStr);
+    },
   );
+
+  ipcMain.handle(
+    "lookup-geoip",
+    async (_event, ipStr: string): Promise<GeoInfo | null> => {
+      if (!ipStr || typeof ipStr !== "string") return null;
+      await initGeoIP();
+      return lookupGeoIP(ipStr);
+    },
+  );
+
+  ipcMain.handle("get-random-bytes", (_event, length: number): number[] => {
+    const len = Math.min(Math.max(1, length || 5), 64);
+    return Array.from(crypto.randomBytes(len));
+  });
 }

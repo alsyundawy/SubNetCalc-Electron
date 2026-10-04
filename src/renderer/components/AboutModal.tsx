@@ -1,4 +1,5 @@
 import React from "react";
+import appIcon from "../assets/icon.png";
 
 interface AboutModalProps {
   version: string;
@@ -14,11 +15,36 @@ export const AboutModal: React.FC<AboutModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="about-modal-title"
+      tabIndex={-1}
+      className="modal-overlay"
+      onClick={(e) => {
+        if (e.target === e.currentTarget) {
+          onClose();
+        }
+      }}
+      onKeyDown={(e) => {
+        if (e.key === "Escape") {
+          onClose();
+        }
+      }}
+    >
+      <div className="modal-content">
         <div className="modal-header">
-          <div className="modal-title">About SubNetCalc-Electron</div>
-          <button className="btn-icon" onClick={onClose}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            <img
+              src={appIcon}
+              alt="SubNetCalc Logo"
+              style={{ width: "28px", height: "28px", objectFit: "contain" }}
+            />
+            <div id="about-modal-title" className="modal-title">
+              About SubNetCalc-Electron
+            </div>
+          </div>
+          <button className="btn-icon" onClick={onClose} aria-label="Close dialog">
             ✕
           </button>
         </div>

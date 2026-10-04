@@ -10,7 +10,7 @@ export interface ResolvedHost {
 export async function resolveHostnameWithTimeout(
   hostname: string,
   preferredFamily: 4 | 6 = 4,
-  timeoutMs = 3000
+  timeoutMs = 3000,
 ): Promise<ResolvedHost | null> {
   const cleanHost = hostname.trim();
 
@@ -33,29 +33,37 @@ export async function resolveHostnameWithTimeout(
     // If not a valid URL format, keep original
   }
 
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("DNS query timeout")), timeoutMs)
-  );
+  let timer: NodeJS.Timeout | undefined;
+  let timedOut = false;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      timedOut = true;
+      reject(new Error("DNS query timeout"));
+    }, timeoutMs);
+  });
 
   try {
     const lookupPromise = (async () => {
-      // Lookup both A and AAAA
+      // Lookup both A and AAAA asynchronously
       let v4: string | null = null;
       let v6: string | null = null;
 
       try {
         const res4 = await dns.resolve4(asciiDomain);
-        if (res4 && res4.length > 0) v4 = res4[0] ?? null;
+        if (!timedOut && res4 && res4.length > 0) v4 = res4[0] ?? null;
       } catch {
-        // Ignore
+        // Ignore resolution errors
       }
 
       try {
         const res6 = await dns.resolve6(asciiDomain);
-        if (res6 && res6.length > 0) v6 = res6[0] ?? null;
+        if (!timedOut && res6 && res6.length > 0) v6 = res6[0] ?? null;
       } catch {
-        // Ignore
+        // Ignore resolution errors
       }
+
+      if (timedOut) return null;
 
       if (preferredFamily === 6 && v6) {
         return { ip: v6, family: 6 as const, originalName: cleanHost };
@@ -75,18 +83,34 @@ export async function resolveHostnameWithTimeout(
     return await Promise.race([lookupPromise, timeoutPromise]);
   } catch {
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }
 
-export async function lookupReverseDns(ipStr: string, timeoutMs = 3000): Promise<string | null> {
-  const timeoutPromise = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error("Reverse DNS timeout")), timeoutMs)
-  );
+export async function lookupReverseDns(
+  ipStr: string,
+  timeoutMs = 3000,
+): Promise<string | null> {
+  let timer: NodeJS.Timeout | undefined;
+  let timedOut = false;
+
+  const timeoutPromise = new Promise<never>((_, reject) => {
+    timer = setTimeout(() => {
+      timedOut = true;
+      reject(new Error("Reverse DNS timeout"));
+    }, timeoutMs);
+  });
 
   try {
-    const revPromise = dns.reverse(ipStr).then((res) => (res && res.length > 0 ? res[0] ?? null : null));
+    const revPromise = dns.reverse(ipStr).then((res) => {
+      if (timedOut) return null;
+      return res && res.length > 0 ? (res[0] ?? null) : null;
+    });
     return await Promise.race([revPromise, timeoutPromise]);
   } catch {
     return null;
+  } finally {
+    if (timer) clearTimeout(timer);
   }
 }

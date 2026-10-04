@@ -5,6 +5,15 @@ interface ResultCardsProps {
   result: CalculateResult;
 }
 
+function formatHostsCount(maxHosts: string, role: string): string {
+  if (role === "multicast") return "Multicast Group";
+  try {
+    return BigInt(maxHosts).toLocaleString();
+  } catch {
+    return maxHosts;
+  }
+}
+
 export const ResultCards: React.FC<ResultCardsProps> = ({ result }) => {
   return (
     <div className="results-grid">
@@ -48,20 +57,25 @@ export const ResultCards: React.FC<ResultCardsProps> = ({ result }) => {
         </div>
       )}
 
-      <div className="metric-card">
+      <div
+        className="metric-card"
+        style={result.family === 6 ? { gridColumn: "span 2" } : undefined}
+      >
         <div className="metric-label">Max Hosts</div>
         <div className="metric-value">
-          {result.role === "multicast" ? "Multicast Group" : Number(result.maxHosts).toLocaleString()}
+          {formatHostsCount(result.maxHosts, result.role)}
         </div>
         <div className="metric-sub">
-          {result.role === "multicast" ? "No host allocation" : `${result.hostBits} Host Bits Available`}
+          {result.role === "multicast"
+            ? "No host allocation"
+            : `${result.hostBits} Host Bits Available`}
         </div>
       </div>
 
       {result.hostRange && (
-        <div className="metric-card" style={{ gridColumn: "span 2" }}>
+        <div className="metric-card" style={{ gridColumn: "span 3" }}>
           <div className="metric-label">Usable Host Range</div>
-          <div className="metric-value" style={{ fontSize: "14px" }}>
+          <div className="metric-value" style={{ fontSize: "13px" }}>
             {result.hostRange.first} — {result.hostRange.last}
           </div>
           <div className="metric-sub">First Usable to Last Usable Address</div>

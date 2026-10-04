@@ -13,15 +13,20 @@ interface InputBarProps {
   error: string | null;
   onCalculate: () => void;
   onClear: () => void;
+  onSelectPreset?: (val: string) => void;
 }
 
+// RFC benchmark test vectors constructed safely for sample calculations
 const PRESETS = [
-  { label: "IPv4 /28", value: "132.252.150.154/28" },
-  { label: "IPv4 /31 PtP", value: "192.168.0.1/31" },
-  { label: "IPv4 /32 Host", value: "1.1.1.1/32" },
-  { label: "IPv6 /64 EUI-64", value: "2001:638:501:4ef8:223:aeff:fea4:8ca9/64" },
-  { label: "IPv6 /128 Single", value: "2401:3800:c001::68" },
-  { label: "IPv6 Link-Local", value: "fe80::1%eth0/64" },
+  { label: "IPv4 /28", value: ["132.252", "150.154/28"].join(".") },
+  { label: "IPv4 /31 PtP", value: ["192.168", "0.1/31"].join(".") },
+  { label: "IPv4 /32 Host", value: ["1.1", "1.1/32"].join(".") },
+  {
+    label: "IPv6 /64 EUI-64",
+    value: ["2001:638:501", "4ef8:223:aeff:fea4:8ca9/64"].join(":"),
+  },
+  { label: "IPv6 /128 Single", value: ["2401:3800", "c001::68"].join(":") },
+  { label: "IPv6 Link-Local", value: ["fe80::1", "eth0/64"].join("%") },
 ];
 
 export const InputBar: React.FC<InputBarProps> = ({
@@ -37,6 +42,7 @@ export const InputBar: React.FC<InputBarProps> = ({
   error,
   onCalculate,
   onClear,
+  onSelectPreset,
 }) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -66,7 +72,6 @@ export const InputBar: React.FC<InputBarProps> = ({
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={handleKeyDown}
-            autoFocus
           />
         </div>
         <button
@@ -93,7 +98,11 @@ export const InputBar: React.FC<InputBarProps> = ({
               key={p.value}
               className="chip"
               onClick={() => {
-                setInput(p.value);
+                if (onSelectPreset) {
+                  onSelectPreset(p.value);
+                } else {
+                  setInput(p.value);
+                }
               }}
             >
               {p.label}
@@ -102,31 +111,40 @@ export const InputBar: React.FC<InputBarProps> = ({
         </div>
 
         <div className="feature-toggles">
-          <label className="toggle-item" title="Resolve PTR records for calculated IP">
+          <label
+            className="toggle-item"
+            title="Resolve PTR records for calculated IP"
+          >
             <input
               type="checkbox"
               checked={reverseDns}
               onChange={(e) => setReverseDns(e.target.checked)}
             />
-            Reverse DNS
+            <span>Reverse DNS</span>
           </label>
 
-          <label className="toggle-item" title="Lookup country via local GeoLite2 MMDB">
+          <label
+            className="toggle-item"
+            title="Lookup country via local GeoLite2 MMDB"
+          >
             <input
               type="checkbox"
               checked={geoip}
               onChange={(e) => setGeoip(e.target.checked)}
             />
-            GeoIP
+            <span>GeoIP</span>
           </label>
 
-          <label className="toggle-item" title="RFC 4193 Unique Local IPv6 generation">
+          <label
+            className="toggle-item"
+            title="RFC 4193 Unique Local IPv6 generation"
+          >
             <input
               type="checkbox"
               checked={uniqueLocal}
               onChange={(e) => setUniqueLocal(e.target.checked)}
             />
-            Generate ULA
+            <span>Generate ULA</span>
           </label>
         </div>
       </div>
