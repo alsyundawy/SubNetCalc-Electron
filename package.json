@@ -1,0 +1,36 @@
+{
+  "name": "subnetcalc-electron",
+  "version": "1.0.0",
+  "description": "High-precision IPv4 & IPv6 Subnet Calculator Desktop Application",
+  "author": "alsyundawy",
+  "license": "MIT",
+  "main": "dist-electron/main/index.js",
+  "scripts": {
+    "dev": "vite",
+    "dev:electron": "electron .",
+    "build:engine": "tsc -p tsconfig.engine.json",
+    "build:main": "vite build --config vite.config.main.ts",
+    "build:preload": "vite build --config vite.config.preload.ts",
+    "build:renderer": "vite build",
+    "build": "npm run build:engine && npm run build:main && npm run build:preload && npm run build:renderer",
+    "test": "vitest run --config vitest.config.ts",
+    "test:watch": "vitest --config vitest.config.ts",
+    "dist": "npm run build && electron-builder"
+  },
+  "dependencies": {
+    "maxmind": "^4.3.24",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.1",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.4",
+    "electron": "^33.2.1",
+    "electron-builder": "^25.1.8",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.1",
+    "vitest": "^2.1.8"
+  }
+}
