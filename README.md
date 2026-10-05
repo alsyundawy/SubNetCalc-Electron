@@ -22,7 +22,7 @@
 </p>
 
 <p align="center">
-  A production-grade, highly optimized, and zero-vulnerability desktop application for calculating IPv4 and IPv6 subnets, network boundaries, binary bit allocations, and address classifications. Inspired by the canonical <strong>SubNetCalc</strong> CLI tool by Dr. Thomas Dreibholz, re-engineered for modern desktop environments with strict RFC compliance, zero window scrolling, real-time bit visualizer, local GeoIP lookup, asynchronous reverse DNS resolution, and native Apple Silicon acceleration.
+  A production-grade, highly optimized, and zero-vulnerability desktop application for calculating IPv4 and IPv6 subnets, network boundaries, binary bit allocations, and address classifications. Combining the mathematical rigor and RFC test oracle parity of the canonical <strong>SubNetCalc</strong> CLI tool by Dr. Thomas Dreibholz with the workflow concepts (interactive mask sync, FLSM, VLSM, CIDR summarization) of Julien Mulot's macOS SubnetCalc, re-engineered for modern desktop environments with pure TypeScript, zero window scrolling, real-time bit visualizer, local GeoIP lookup, and native Apple Silicon acceleration.
 </p>
 
 <p align="center">
@@ -33,7 +33,10 @@
     <img src="https://img.shields.io/badge/🪞_Releases_&_Changelog-GitHub-0284c7?style=for-the-badge&logo=github&logoColor=white" alt="Releases & Changelog">
   </a>
   <a href="https://github.com/dreibh/subnetcalc">
-    <img src="https://img.shields.io/badge/📦_Upstream_Attribution-dreibh/subnetcalc-blue?style=for-the-badge&logo=github&logoColor=white" alt="Upstream Repository">
+    <img src="https://img.shields.io/badge/📦_CLI_Oracle-dreibh/subnetcalc-blue?style=for-the-badge&logo=github&logoColor=white" alt="Upstream CLI Repository">
+  </a>
+  <a href="https://github.com/mulot/SubnetCalc">
+    <img src="https://img.shields.io/badge/🍏_macOS_Heritage-mulot/SubnetCalc-orange?style=for-the-badge&logo=apple&logoColor=white" alt="Upstream macOS GUI Repository">
   </a>
   <a href="https://github.com/alsyundawy/SubNetCalc-Electron/issues">
     <img src="https://img.shields.io/badge/🐛_Report_Issue-GitHub_Issues-red?style=for-the-badge&logo=github&logoColor=white" alt="Report Issue">
@@ -42,12 +45,12 @@
 
 > Maintained, engineered, and packaged by<br>
 > **[`HARRY DERTIN SUTISNA ALSYUNDAWY (@alsyundawy)`](https://github.com/alsyundawy)** —<br>
-> High-performance networking suite for macOS and cross-platform desktop, featuring pure TypeScript subnet engine calculation, 100% test oracle parity with upstream `dreibh/subnetcalc`, strict WCAG AAA color contrast, and zero-leak memory watcher governance.
+> High-performance networking suite for macOS and cross-platform desktop, featuring pure TypeScript subnet engine calculation, 100% test oracle parity with upstream `dreibh/subnetcalc`, GUI ergonomics inspired by `mulot/SubnetCalc`, strict WCAG AAA color contrast, and zero-leak memory watcher governance.
 >
 > 🍏 **[`Latest Releases (v1.0.0)`](https://github.com/alsyundawy/SubNetCalc-Electron/releases/latest)** &nbsp;|&nbsp;
 > 📖 **[`Release DocNotes`](DOCNOTE.md)** &nbsp;|&nbsp;
 > 📜 **[`Changelog`](CHANGELOG.md)** &nbsp;|&nbsp;
-> 🏠 **[`Upstream Repository (@dreibh)`](https://github.com/dreibh/subnetcalc)** &nbsp;|&nbsp;
+> 📋 **[`Feature Integration Plan`](docs/superpowers/plans/2026-10-05-mulot-subnetcalc-feature-integration.md)** &nbsp;|&nbsp;
 > 🐛 **[`Issue Tracker`](https://github.com/alsyundawy/SubNetCalc-Electron/issues)** &nbsp;|&nbsp;
 > 💖 **[`Support via PayPal`](https://www.paypal.me/alsyundawy)**
 
@@ -58,10 +61,13 @@
 > ### ⚠️ Technical Notice & Upstream Attribution
 >
 > **Algorithmic Heritage & Attribution**<br>
-> This software is inspired by and grounded in the canonical algorithmic behavior, property definitions, and format specifications of the original **SubNetCalc** IPv4/IPv6 subnet calculation engine authored by **Dr. Thomas Dreibholz** ([`dreibh/subnetcalc`](https://github.com/dreibh/subnetcalc)). All network address calculations, bit-manipulation functions, and property mappings maintain 100% test parity with upstream oracle outputs.
+> This software draws inspiration from two landmark open-source projects in the networking community:
+>
+> 1. **Dr. Thomas Dreibholz** ([`dreibh/subnetcalc`](https://github.com/dreibh/subnetcalc)): Canonical IPv4/IPv6 CLI subnet calculation engine, exact RFC property definitions, and test fixtures maintaining 100% test parity with upstream oracle outputs.
+> 2. **Julien Mulot** ([`mulot/SubnetCalc`](https://github.com/mulot/SubnetCalc) / [`subnetcalc.mulot.org`](https://subnetcalc.mulot.org)): The classic macOS Subnet Calculator GUI, pioneering interactive mask synchronization, FLSM, VLSM, CIDR summarization, and data portability.
 >
 > **License & Warranty**<br>
-> Distributed under the terms of the permissive **MIT License**. This software is provided on an "AS IS" basis without warranties of any kind.
+> Distributed under the terms of the permissive **MIT License**. This software is an independent clean-room implementation written in pure TypeScript and is provided on an "AS IS" basis without warranties of any kind.
 
 ---
 
@@ -288,7 +294,8 @@ SubNetCalc-Electron enforces rigorous standards across every pillar:
 
 SubNetCalc-Electron is built upon foundational work from the open-source networking community:
 
-- **Original SubNetCalc Engine**: Authored by **Dr. Thomas Dreibholz** ([`dreibh/subnetcalc`](https://github.com/dreibh/subnetcalc)).
+- **Original SubNetCalc CLI Engine**: Authored by **Dr. Thomas Dreibholz** ([`dreibh/subnetcalc`](https://github.com/dreibh/subnetcalc)). Provided the rigorous RFC specifications, mathematical models, and verification oracle test vectors for IPv4 and IPv6 subnet transformations.
+- **Classic macOS SubnetCalc GUI**: Authored by **Julien Mulot** ([`mulot/SubnetCalc`](https://github.com/mulot/SubnetCalc) & [`subnetcalc.mulot.org`](https://subnetcalc.mulot.org)). Pioneered desktop subnet calculation on macOS, inspiring our UI layout, bi-directional slider controls, FLSM/VLSM engines, and data export suite.
 - **GeoIP Database Parser**: Powered by the [`maxmind`](https://github.com/runk/node-maxmind) pure JavaScript MMDB library.
 - **Desktop Framework & Tooling**: Powered by [`Electron`](https://www.electronjs.org/), [`React`](https://react.dev/), and [`Vite`](https://vitejs.dev/).
 

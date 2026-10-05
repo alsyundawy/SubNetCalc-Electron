@@ -5,6 +5,7 @@ FROM node:22-slim AS builder
 WORKDIR /app
 
 # Install build dependencies
+# hadolint ignore=DL3008
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3 \
     make \
@@ -35,12 +36,12 @@ RUN npm ci --omit=dev && npm cache clean --force
 COPY --from=builder /app/dist ./dist
 COPY --from=builder /app/dist-electron ./dist-electron
 
-# Non-root user for security best practices
-USER node
+# Non-root user for security best practices (UID:GID for node user)
+USER 1000:1000
 
 EXPOSE 3000
 
 HEALTHCHECK --interval=30s --timeout=5s --start-period=5s --retries=3 \
-  CMD node -e "process.exit(0)" || exit 1
+  CMD ["node", "-e", "process.exit(0)"]
 
 CMD ["node", "-e", "console.log('SubNetCalc engine container initialized successfully.')"]

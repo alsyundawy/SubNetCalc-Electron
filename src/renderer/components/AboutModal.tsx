@@ -2,16 +2,16 @@ import React, { useEffect } from "react";
 import appIcon from "../assets/icon.png";
 
 export type AboutModalProps = {
-  version: string;
-  isOpen: boolean;
-  onClose: () => void;
+  readonly version: string;
+  readonly isOpen: boolean;
+  readonly onClose: () => void;
 };
 
 export function AboutModal({
   version,
   isOpen,
   onClose,
-}: AboutModalProps): React.JSX.Element | null {
+}: Readonly<AboutModalProps>): React.JSX.Element | null {
   useEffect(() => {
     if (!isOpen) return;
 
@@ -89,7 +89,8 @@ export function AboutModal({
             </strong>
             <p style={{ marginTop: "4px" }}>
               Developed &amp; Maintained by:{" "}
-              <strong>Harry Dertin Sutisna Alsyundawy</strong> (
+              <strong>Harry Dertin Sutisna Alsyundawy</strong>
+              {" ("}
               <a
                 href="https://github.com/alsyundawy"
                 target="_blank"
@@ -97,7 +98,7 @@ export function AboutModal({
               >
                 @alsyundawy
               </a>
-              )
+              {")"}
             </p>
             <p style={{ marginTop: "4px" }}>
               Contact Email:{" "}
@@ -175,28 +176,52 @@ export function AboutModal({
               padding: "12px",
             }}
           >
-            <strong>Upstream Attribution:</strong>
-            <p style={{ marginTop: "4px" }}>
-              Inspired by the algorithmic behavior, network properties, and
-              output format of the canonical <strong>SubNetCalc</strong> CLI
-              tool authored by <strong>Dr. Thomas Dreibholz</strong>.
-            </p>
+            <strong style={{ color: "var(--accent-primary, #60a5fa)" }}>
+              Upstream Heritage &amp; Attribution:
+            </strong>
             <p style={{ marginTop: "6px" }}>
-              Upstream Project:{" "}
+              <strong>1. Dr. Thomas Dreibholz</strong>
+              {" ("}
               <a
                 href="https://github.com/dreibh/subnetcalc"
                 target="_blank"
                 rel="noreferrer"
               >
-                https://github.com/dreibh/subnetcalc
+                dreibh/subnetcalc
               </a>
+              {
+                "): Canonical IPv4/IPv6 CLI subnet calculation engine, exact RFC property definitions, and algorithmic test oracle parity."
+              }
+            </p>
+            <p style={{ marginTop: "6px" }}>
+              <strong>2. Julien Mulot</strong>
+              {" ("}
+              <a
+                href="https://github.com/mulot/SubnetCalc"
+                target="_blank"
+                rel="noreferrer"
+              >
+                mulot/SubnetCalc
+              </a>
+              {" / "}
+              <a
+                href="https://subnetcalc.mulot.org"
+                target="_blank"
+                rel="noreferrer"
+              >
+                subnetcalc.mulot.org
+              </a>
+              {
+                "): Classic macOS Subnet Calculator GUI, pioneering interactive mask synchronization, FLSM, VLSM, CIDR summarization, and data exports."
+              }
             </p>
           </div>
 
-          <p>
+          <p style={{ fontSize: "11.5px", color: "var(--text-secondary)" }}>
             Supported Standards: RFC 791 (IPv4), RFC 4291 (IPv6 Architecture),
             RFC 4193 (Unique Local IPv6), RFC 5952 (Canonical IPv6 Format), RFC
-            3021 (31-bit PtP Links).
+            3021 (31-bit PtP Links), RFC 1918 (Private Address Allocation), RFC
+            4180 (CSV Format).
           </p>
         </div>
 
