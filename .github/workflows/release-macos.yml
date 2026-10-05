@@ -1,0 +1,170 @@
+name: Release SubNetCalc macOS
+
+on:
+  push:
+    tags:
+      - v*
+  # checkov:skip=CKV_GHA_7: Allow manual workflow_dispatch inputs for flexible release tags
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag rilis yang ingin di-build (contoh: v1.0.0, v1.1.0)"
+        required: true
+        default: v1.1.0
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: 22.x
+  CSC_IDENTITY_AUTO_DISCOVERY: false
+  MACOSX_DEPLOYMENT_TARGET: "12.0"
+
+jobs:
+  build:
+    name: Build macOS Release (${{ matrix.arch_label }})
+    runs-on: ${{ matrix.runs_on }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ─── macOS Intel ───────────────────────────────────────────
+          - runs_on: macos-15-intel
+            platform: mac
+            arch: x64
+            arch_label: Intel x64
+            build_script: dist:mac
+
+          # ─── macOS Apple Silicon (macOS Latest) ────────────────────
+          - runs_on: macos-latest
+            platform: mac
+            arch: arm64
+            arch_label: Apple Silicon ARM64 (macOS Latest)
+            build_script: dist:mac:arm64
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
+          persist-credentials: false
+
+      - name: Setup NodeJS for macOS
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Dependencies
+        shell: bash
+        run: npm ci
+
+      - name: Run Quality Verification & Tests
+        shell: bash
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+
+      - name: Build macOS DMG & ZIP (${{ matrix.arch_label }})
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          sudo mdutil -a -i off 2>/dev/null || true
+          echo "Packaging Release DMG & ZIP for ${{ matrix.arch }}..."
+          npm run ${{ matrix.build_script }} || {
+            echo "First DMG build attempt failed, retrying after cleanup..."
+            sleep 3
+            npm run ${{ matrix.build_script }}
+          }
+
+      - name: Generate SHA-256 Digest (${{ matrix.arch }})
+        shell: bash
+        run: |
+          cd release
+          shasum -a 256 ./*.dmg ./*.zip > SHA256SUMS-${{ matrix.arch }}.txt
+          echo "=== SHA256SUMS-${{ matrix.arch }}.txt ==="
+          cat SHA256SUMS-${{ matrix.arch }}.txt
+
+      - name: Upload Build Artifact (${{ matrix.arch_label }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: subnetcalc-macos-${{ matrix.runs_on }}-${{ matrix.arch }}
+          path: |
+            release/*.dmg
+            release/*.zip
+            release/*.blockmap
+            release/SHA256SUMS-*.txt
+          if-no-files-found: error
+
+  # ─── GitHub Release Job ───────────────────────────────────────────
+  github-release:
+    name: Publish GitHub Release
+    runs-on: macos-latest
+    timeout-minutes: 20
+    needs: [build]
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
+          persist-credentials: false
+
+      - name: Determine Release Tag
+        shell: bash
+        run: |
+          if [ -n "${{ inputs.tag }}" ]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${{ github.ref_name }}"
+          fi
+          echo "RELEASE_TAG=${TAG}" >> "$GITHUB_ENV"
+
+      - name: Create or Verify Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
+          gh release create "$RELEASE_TAG" \
+            --title "${RELEASE_TAG}" \
+            --generate-notes
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: Upload Release Assets & Consolidated Checksums
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== Downloaded Artifact Directories ==="
+          ls -la
+
+          # Consolidate SHA-256 checksums from all architecture builds
+          find . -name "SHA256SUMS-*.txt" -exec cat {} + > SHA256SUMS.txt
+          if [ -s SHA256SUMS.txt ]; then
+            echo "=== Consolidated SHA256SUMS.txt ==="
+            cat SHA256SUMS.txt
+            gh release upload "${RELEASE_TAG}" SHA256SUMS.txt --clobber
+          fi
+
+          # Upload DMG, ZIP, and blockmap artifacts
+          for dir in subnetcalc-macos-*; do
+            echo "Processing artifact dir: ${dir}"
+            if [ -d "${dir}" ]; then
+              for file in "${dir}"/*.dmg "${dir}"/*.zip "${dir}"/*.blockmap; do
+                if [ -f "${file}" ]; then
+                  echo "Uploading ${file} -> Release ${RELEASE_TAG}..."
+                  gh release upload "${RELEASE_TAG}" "${file}" --clobber
+                fi
+              done
+            else
+              echo "WARNING: Directory ${dir} not found"
+            fi
+          done
