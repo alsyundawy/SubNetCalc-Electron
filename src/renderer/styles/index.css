@@ -700,11 +700,25 @@ dialog.modal-overlay::backdrop {
   background: transparent;
 }
 
+.modal-backdrop-btn {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  background: transparent;
+  border: none;
+  cursor: default;
+  padding: 0;
+  margin: 0;
+}
+
 .modal-content {
+  position: relative;
+  z-index: 1;
   background: #111827;
   border: 1px solid var(--border-color);
   border-radius: var(--radius-md);
-  max-width: 520px;
+  max-width: 560px;
   width: 90%;
   padding: 18px;
   box-shadow: var(--shadow-md);
@@ -731,6 +745,9 @@ dialog.modal-overlay::backdrop {
   display: flex;
   flex-direction: column;
   gap: 10px;
+  max-height: 65vh;
+  overflow-y: auto;
+  padding-right: 4px;
 }
 
 .modal-body strong {

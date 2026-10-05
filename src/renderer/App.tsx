@@ -34,7 +34,7 @@ interface ResolvedHostResult {
 const resolveHostPortion = async (
   rawInput: string,
   requestId: number,
-  currentRequestId: React.MutableRefObject<number>,
+  currentRequestId: React.RefObject<number>,
 ): Promise<ResolvedHostResult | null> => {
   const parts = rawInput.split(/[/\s]/);
   const hostPart = parts[0]!;
@@ -55,7 +55,7 @@ const resolveHostPortion = async (
 const generateUlaBytes = async (
   uniqueLocal: boolean,
   requestId: number,
-  currentRequestId: React.MutableRefObject<number>,
+  currentRequestId: React.RefObject<number>,
 ): Promise<Uint8Array | undefined | null> => {
   if (!uniqueLocal) return undefined;
   if (window.subnetcalc?.getRandomBytes) {
@@ -72,7 +72,7 @@ const enrichReverseDns = (
   address: string,
   dnsHostname: string | null,
   requestId: number,
-  currentRequestId: React.MutableRefObject<number>,
+  currentRequestId: React.RefObject<number>,
   setResult: React.Dispatch<React.SetStateAction<CalculateResult | null>>,
 ): void => {
   if (!window.subnetcalc?.lookupReverseDns) return;
@@ -99,7 +99,7 @@ const enrichReverseDns = (
 const enrichGeoIP = (
   address: string,
   requestId: number,
-  currentRequestId: React.MutableRefObject<number>,
+  currentRequestId: React.RefObject<number>,
   setResult: React.Dispatch<React.SetStateAction<CalculateResult | null>>,
 ): void => {
   if (!window.subnetcalc?.lookupGeoIP) return;

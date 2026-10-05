@@ -2,7 +2,19 @@
   "name": "subnetcalc-electron",
   "version": "1.0.0",
   "description": "High-precision IPv4 & IPv6 Subnet Calculator Desktop Application",
-  "author": "alsyundawy",
+  "author": {
+    "name": "Harry Dertin Sutisna Alsyundawy",
+    "email": "alsyundawy@gmail.com",
+    "url": "https://github.com/alsyundawy"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/alsyundawy/SubNetCalc-Electron.git"
+  },
+  "bugs": {
+    "url": "https://github.com/alsyundawy/SubNetCalc-Electron/issues"
+  },
+  "homepage": "https://github.com/alsyundawy/SubNetCalc-Electron#readme",
   "license": "MIT",
   "main": "dist-electron/main/index.js",
   "engines": {

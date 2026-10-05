@@ -1,35 +1,44 @@
-import React from "react";
+import React, { useEffect } from "react";
 import appIcon from "../assets/icon.png";
 
-interface AboutModalProps {
+export type AboutModalProps = {
   version: string;
   isOpen: boolean;
   onClose: () => void;
-}
+};
 
-export const AboutModal: React.FC<AboutModalProps> = ({
+export function AboutModal({
   version,
   isOpen,
   onClose,
-}) => {
+}: AboutModalProps): React.JSX.Element | null {
+  useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent): void => {
+      if (e.key === "Escape") {
+        onClose();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => {
+      window.removeEventListener("keydown", handleKeyDown);
+    };
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
 
   return (
-    <dialog
-      open
-      aria-labelledby="about-modal-title"
-      className="modal-overlay"
-      onClick={(e) => {
-        if (e.target === e.currentTarget) {
-          onClose();
-        }
-      }}
-      onKeyDown={(e) => {
-        if (e.key === "Escape") {
-          onClose();
-        }
-      }}
-    >
+    <dialog open aria-labelledby="about-modal-title" className="modal-overlay">
+      <button
+        type="button"
+        className="modal-backdrop-btn"
+        onClick={onClose}
+        aria-label="Close dialog backdrop"
+        tabIndex={-1}
+      />
+
       <div className="modal-content">
         <div className="modal-header">
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
@@ -43,6 +52,7 @@ export const AboutModal: React.FC<AboutModalProps> = ({
             </div>
           </div>
           <button
+            type="button"
             className="btn-icon"
             onClick={onClose}
             aria-label="Close dialog"
@@ -65,6 +75,97 @@ export const AboutModal: React.FC<AboutModalProps> = ({
             <br />
             <strong>Engine:</strong> Pure TypeScript Calculation Engine
           </p>
+
+          <div
+            style={{
+              background: "rgba(59, 130, 246, 0.08)",
+              border: "1px solid rgba(59, 130, 246, 0.25)",
+              borderRadius: "8px",
+              padding: "12px",
+            }}
+          >
+            <strong style={{ color: "var(--accent-primary, #60a5fa)" }}>
+              Author &amp; Repository:
+            </strong>
+            <p style={{ marginTop: "4px" }}>
+              Developed &amp; Maintained by:{" "}
+              <strong>Harry Dertin Sutisna Alsyundawy</strong> (
+              <a
+                href="https://github.com/alsyundawy"
+                target="_blank"
+                rel="noreferrer"
+              >
+                @alsyundawy
+              </a>
+              )
+            </p>
+            <p style={{ marginTop: "4px" }}>
+              Contact Email:{" "}
+              <a href="mailto:alsyundawy@gmail.com">alsyundawy@gmail.com</a>
+            </p>
+            <p style={{ marginTop: "4px" }}>
+              Repository:{" "}
+              <a
+                href="https://github.com/alsyundawy/SubNetCalc-Electron"
+                target="_blank"
+                rel="noreferrer"
+              >
+                https://github.com/alsyundawy/SubNetCalc-Electron
+              </a>
+            </p>
+            <p style={{ marginTop: "4px" }}>
+              Issue Tracker:{" "}
+              <a
+                href="https://github.com/alsyundawy/SubNetCalc-Electron/issues"
+                target="_blank"
+                rel="noreferrer"
+              >
+                github.com/alsyundawy/SubNetCalc-Electron/issues
+              </a>
+            </p>
+            <div
+              style={{
+                marginTop: "8px",
+                display: "flex",
+                gap: "10px",
+                flexWrap: "wrap",
+                fontSize: "11px",
+              }}
+            >
+              <a
+                href="https://www.paypal.me/alsyundawy"
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  textDecoration: "none",
+                }}
+              >
+                💖 Donate via PayPal
+              </a>
+              <a
+                href="https://github.com/sponsors/alsyundawy"
+                target="_blank"
+                rel="noreferrer"
+                style={{
+                  background: "rgba(255, 255, 255, 0.08)",
+                  padding: "4px 8px",
+                  borderRadius: "4px",
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "4px",
+                  textDecoration: "none",
+                }}
+              >
+                ☕ Sponsor on GitHub
+              </a>
+            </div>
+          </div>
 
           <div
             style={{
@@ -100,11 +201,11 @@ export const AboutModal: React.FC<AboutModalProps> = ({
         </div>
 
         <div className="modal-footer">
-          <button className="btn-secondary" onClick={onClose}>
+          <button type="button" className="btn-secondary" onClick={onClose}>
             Close
           </button>
         </div>
       </div>
     </dialog>
   );
-};
+}

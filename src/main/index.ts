@@ -42,7 +42,11 @@ function createWindow(): void {
 
   // Intercept window open calls to open safe external links in default OS browser
   mainWindow.webContents.setWindowOpenHandler(({ url }) => {
-    if (url.startsWith("https://") || url.startsWith("http://")) {
+    if (
+      url.startsWith("https://") ||
+      url.startsWith("http://") ||
+      url.startsWith("mailto:")
+    ) {
       void shell.openExternal(url);
     }
     return { action: "deny" };
