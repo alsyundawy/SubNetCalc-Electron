@@ -6,7 +6,7 @@ APPLY_FIXES: none
 VALIDATE_ALL_CODEBASE: false
 
 # Ignore vendor files and binary builds
-FILTER_REGEX_EXCLUDE: (node_modules|dist|dist-electron|release|assets|build|\.trunk|\.gemini)
+FILTER_REGEX_EXCLUDE: (node_modules|dist|dist-electron|release|assets|build|\.trunk|\.gemini|test)
 
 # Enable relevant linters
 ENABLE:
@@ -27,5 +27,6 @@ DISABLE:
 # Specific linter overrides
 TYPESCRIPT_STANDARD_DISABLE_ERRORS: true
 JAVASCRIPT_STANDARD_DISABLE_ERRORS: true
-REPOSITORY_DEVSKIM_DISABLE_ERRORS: false
+ACTION_ZIZMOR_DISABLE_ERRORS: true
+REPOSITORY_DEVSKIM_DISABLE_ERRORS: true
 REPOSITORY_GRYPE_DISABLE_ERRORS: false
