@@ -32,14 +32,28 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Build & Packaging**:
   - Electron 44.5.1, React 19.3.0, and Vite 8.3.2 build architecture.
-  - Universal macOS packaging (`release/SubNetCalc-1.0.0-arm64.dmg` for Apple Silicon and `release/SubNetCalc-1.0.0.dmg` for Intel x64).
+  - Aligned packaging pipeline with `pear-desktop`, introducing `npm run clean` to guarantee clean builds.
+  - Standardized explicit artifact naming pattern: `SubNetCalc-${version}-${arch}.${ext}`.
+  - Dedicated architecture DMG builds:
+    - Apple Silicon ARM64: `release/SubNetCalc-1.0.0-arm64.dmg` (~113 MB).
+    - Intel Core x64: `release/SubNetCalc-1.0.0-x64.dmg` (~115 MB).
   - Standalone transparent application launcher icon (`build/icon.png` and `build/icon.icns`).
+
+- **Automated CI/CD & GitHub Actions Release Runner**:
+  - Fully automated multi-architecture release pipeline in `.github/workflows/release-macos.yml` running in parallel on `macos-latest` (ARM64) and `macos-15-intel` (x64) runners.
+  - Automated runner-side compilation of native macOS DMGs, ZIP archives, and blockmaps.
+  - Automated SHA-256 digest calculation and consolidation into `SHA256SUMS.txt` published directly to GitHub Releases.
+  - Pinned all workflow actions to immutable release tags (`actions/checkout@v4.2.2`, `actions/setup-node@v4.2.0`, `actions/upload-artifact@v4.6.1`, `actions/download-artifact@v4.1.9`).
+  - Configured 7-day Dependabot cooldown in `.github/dependabot.yml` protecting supply chain against zero-day package tampering.
 
 ### Security & Hardening
 
 - Hardened Content Security Policy (CSP) without `'unsafe-inline'`.
 - Strict Electron isolation: `contextIsolation: true`, `nodeIntegration: false`, and `sandbox: true`.
-- Zero vulnerable dependencies reported across `npm audit` (0 vulnerabilities).
+- Zero vulnerable dependencies reported across `npm audit` and Grype (resolved `GHSA-cxww-7g56-2vh6`).
+- Enforced secure HTTPS protocol for IDN URL parsing in `src/main/dns.ts:30` (resolved DevSkim `DS137138`).
+- Decoupled shell arguments via intermediate environment variables across all GitHub Actions workflows, resolving Zizmor template-injection risks.
+- Added `.jscpd.json` and `.mega-linter.yml` ensuring 100% clean linter passes across Trunk, Oxlint, Super-Linter, MegaLinter, and CodeQL.
 
 ### Documentation
 

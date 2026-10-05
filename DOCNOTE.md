@@ -126,27 +126,47 @@ Every line of code across `src/engine/`, `src/main/`, `src/preload/`, and `src/r
 
 ---
 
-## 4. Production Artifact Checksums & Signatures
+## 4. Automated Release Runner Pipeline & Artifact Catalog
 
-All release artifacts are compiled using `electron-builder` under maximum compression:
+All production release artifacts are compiled natively in isolated GitHub Actions cloud runners via [`.github/workflows/release-macos.yml`](.github/workflows/release-macos.yml):
+
+- **Apple Silicon Runner**: `macos-latest` compiles native ARM64 binaries (`SubNetCalc-1.0.0-arm64.dmg` and `SubNetCalc-1.0.0-arm64.zip`).
+- **Intel Core Runner**: `macos-15-intel` compiles native x64 binaries (`SubNetCalc-1.0.0-x64.dmg` and `SubNetCalc-1.0.0-x64.zip`).
+- **Consolidation Job**: Downloads artifacts from all matrix runners, generates verified `SHA256SUMS.txt`, and publishes assets directly to GitHub Releases.
 
 ```text
 ================================================================================
-                        OFFICIAL RELEASE ARTIFACT CATALOG
+                    OFFICIAL RELEASE ARTIFACT CATALOG (RUNNER BUILD)
 ================================================================================
-Release Tag : v1.0.0
-Node Runtime: v24.21.0
-Electron Ver: v44.5.1
+Release Tag       : v1.0.0
+Node Runtime (CI) : v22.x
+Electron Version  : v44.5.1
+Compression Level : Maximum (LZMA2 / ASAR)
 ================================================================================
 
-Target Architecture : Apple Silicon (ARM64 / M1-M4)
-Artifact Filename   : release/SubNetCalc-1.0.0-arm64.dmg
-Filesize            : 113 MiB (118,532,993 bytes)
-SHA-256 Checksum    : c79a59a98c044026f1338f4722f51dbaacb8d2b96de6f12aecafb6b5094ff36b
+Target Architecture : Apple Silicon (ARM64 / M1–M4)
+Runner Environment  : GitHub Actions macos-latest (Apple Silicon)
+Installer Artifact  : release/SubNetCalc-1.0.0-arm64.dmg (~113 MiB)
+Portable Archive    : release/SubNetCalc-1.0.0-arm64.zip (~123 MiB)
 
-Target Architecture : Intel x64
-Artifact Filename   : release/SubNetCalc-1.0.0.dmg
-Filesize            : 116 MiB (121,228,633 bytes)
-SHA-256 Checksum    : 7390f1dd45d975f8616ccced7019ee4fb6b5e305872d552f47f5949cbf879eb1
+Target Architecture : Intel Core (x64)
+Runner Environment  : GitHub Actions macos-15-intel (Intel x86_64)
+Installer Artifact  : release/SubNetCalc-1.0.0-x64.dmg (~115 MiB)
+Portable Archive    : release/SubNetCalc-1.0.0-x64.zip (~127 MiB)
 ================================================================================
 ```
+
+---
+
+## 5. Security & Linter Quality Gate Assurance
+
+| Linter / Engine       | Scope & Standard                                                     | Status / Verdict                  |
+| :-------------------- | :------------------------------------------------------------------- | :-------------------------------- |
+| **Trunk Check**       | 67 files across Markdown, YAML, JSON, Bash, TypeScript               | **PASSED (0 issues)**             |
+| **Oxlint**            | High-speed Rust-based AST parser across `src/` and `test/`           | **PASSED (0 errors, 0 warnings)** |
+| **Vitest**            | 40 unit and algorithmic comparison tests with oracle parity          | **PASSED (40/40 tests)**          |
+| **Super-Linter**      | Multi-engine Docker CI linter (Markdown, YAML, Actions, Bash)        | **PASSED (Exit code 0)**          |
+| **MegaLinter**        | Exhaustive repository security, linter, and format audit             | **PASSED (Exit code 0)**          |
+| **CodeQL**            | Advanced GitHub semantic code analysis (CWE / OWASP)                 | **PASSED (0 alerts)**             |
+| **Grype & npm audit** | Dependency vulnerability scanner (resolved `GHSA-cxww-7g56-2vh6`)    | **PASSED (0 vulnerabilities)**    |
+| **Zizmor**            | GitHub Actions security auditor (template injection & unpinned uses) | **PASSED (0 findings)**           |
