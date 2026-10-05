@@ -54,27 +54,30 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
           persist-credentials: false
 
       - name: Inspect Runner Environment
         shell: bash
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+          TARGET_REF: ${{ inputs.ref || github.ref }}
         run: |
           echo "=========================================="
           echo "Runner Name : $RUNNER_NAME"
           echo "Runner OS   : $RUNNER_OS"
-          echo "Target Arch : ${{ matrix.arch }}"
+          echo "Target Arch : $TARGET_ARCH"
           echo "System Arch : $(uname -m)"
           echo "Event Name  : $GITHUB_EVENT_NAME"
           echo "Trigger Ref : $GITHUB_REF"
-          echo "Target Ref  : ${{ inputs.ref || github.ref }}"
+          echo "Target Ref  : $TARGET_REF"
           sw_vers || true
           echo "=========================================="
 
       - name: Setup NodeJS for macOS
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -90,17 +93,19 @@ jobs:
           npm run lint
           npm test
 
-      - name: Build macOS DMG & ZIP (${{ matrix.arch_label }})
+      - name: Build macOS DMG (${{ matrix.arch_label }})
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_SCRIPT: ${{ matrix.build_script }}
+          TARGET_ARCH: ${{ matrix.arch }}
         run: |
           sudo mdutil -a -i off 2>/dev/null || true
-          echo "Building SubNetCalc for macOS ${{ matrix.arch }} using '${{ matrix.build_script }}'..."
-          npm run ${{ matrix.build_script }} || {
+          echo "Building SubNetCalc for macOS $TARGET_ARCH using '$BUILD_SCRIPT'..."
+          npm run "$BUILD_SCRIPT" || {
             echo "First DMG build attempt failed, retrying after cleanup..."
             sleep 3
-            npm run ${{ matrix.build_script }}
+            npm run "$BUILD_SCRIPT"
           }
 
       - name: Verify Output Files
@@ -110,11 +115,10 @@ jobs:
           ls -lh release/
 
       - name: Upload macOS Artifacts (${{ matrix.arch }})
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.1
         with:
           name: subnetcalc-macos-${{ matrix.arch }}
           path: |
             release/*.dmg
-            release/*.zip
             release/*.blockmap
           if-no-files-found: error

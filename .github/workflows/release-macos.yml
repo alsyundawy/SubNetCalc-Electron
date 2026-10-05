@@ -46,13 +46,13 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
           persist-credentials: false
 
       - name: Setup NodeJS for macOS
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v4.2.0
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: npm
@@ -68,29 +68,33 @@ jobs:
           npm run lint
           npm test
 
-      - name: Build macOS DMG & ZIP (${{ matrix.arch_label }})
+      - name: Build macOS DMG (${{ matrix.arch_label }})
         shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_SCRIPT: ${{ matrix.build_script }}
+          TARGET_ARCH: ${{ matrix.arch }}
         run: |
           sudo mdutil -a -i off 2>/dev/null || true
-          echo "Packaging Release DMG & ZIP for ${{ matrix.arch }}..."
-          npm run ${{ matrix.build_script }} || {
+          echo "Packaging Release DMG for $TARGET_ARCH..."
+          npm run "$BUILD_SCRIPT" || {
             echo "First DMG build attempt failed, retrying after cleanup..."
             sleep 3
-            npm run ${{ matrix.build_script }}
+            npm run "$BUILD_SCRIPT"
           }
 
       - name: Generate SHA-256 Digest (${{ matrix.arch }})
         shell: bash
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
         run: |
           cd release
-          shasum -a 256 ./*.dmg ./*.zip > SHA256SUMS-${{ matrix.arch }}.txt
-          echo "=== SHA256SUMS-${{ matrix.arch }}.txt ==="
-          cat SHA256SUMS-${{ matrix.arch }}.txt
+          shasum -a 256 ./*.dmg ./*.zip 2>/dev/null > "SHA256SUMS-${TARGET_ARCH}.txt" || shasum -a 256 ./*.dmg > "SHA256SUMS-${TARGET_ARCH}.txt"
+          echo "=== SHA256SUMS-${TARGET_ARCH}.txt ==="
+          cat "SHA256SUMS-${TARGET_ARCH}.txt"
 
       - name: Upload Build Artifact (${{ matrix.arch_label }})
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v4.6.1
         with:
           name: subnetcalc-macos-${{ matrix.runs_on }}-${{ matrix.arch }}
           path: |
@@ -110,18 +114,21 @@ jobs:
       contents: write
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.2.2
         with:
           ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
           persist-credentials: false
 
       - name: Determine Release Tag
         shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
         run: |
-          if [ -n "${{ inputs.tag }}" ]; then
-            TAG="${{ inputs.tag }}"
+          if [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
           else
-            TAG="${{ github.ref_name }}"
+            TAG="$REF_NAME"
           fi
           echo "RELEASE_TAG=${TAG}" >> "$GITHUB_ENV"
 
@@ -136,7 +143,7 @@ jobs:
             --generate-notes
 
       - name: Download all artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v4.1.9
 
       - name: Upload Release Assets & Consolidated Checksums
         shell: bash

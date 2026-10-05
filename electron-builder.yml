@@ -1,3 +1,4 @@
+---
 appId: com.alsyundawy.subnetcalc
 productName: SubNetCalc
 directories:
@@ -17,15 +18,10 @@ files:
   - "!**/*.map"
 mac:
   category: public.app-category.developer-tools
+  artifactName: SubNetCalc-${version}-${arch}.${ext}
   target:
     - target: dmg
-      arch:
-        - x64
-        - arm64
     - target: zip
-      arch:
-        - x64
-        - arm64
 linux:
   category: Network
   target:

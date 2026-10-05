@@ -1,0 +1,31 @@
+---
+# MegaLinter configuration file
+# Reference: https://megalinter.io/configuration/
+
+APPLY_FIXES: none
+VALIDATE_ALL_CODEBASE: false
+
+# Ignore vendor files and binary builds
+FILTER_REGEX_EXCLUDE: (node_modules|dist|dist-electron|release|assets|build|\.trunk|\.gemini)
+
+# Enable relevant linters
+ENABLE:
+  - JAVASCRIPT
+  - TYPESCRIPT
+  - JSON
+  - YAML
+  - MARKDOWN
+  - DOCKERFILE
+  - ACTION
+  - REPOSITORY
+
+# Disable non-applicable linter categories
+DISABLE:
+  - COPYPASTE
+  - SPELL
+
+# Specific linter overrides
+TYPESCRIPT_STANDARD_DISABLE_ERRORS: true
+JAVASCRIPT_STANDARD_DISABLE_ERRORS: true
+REPOSITORY_DEVSKIM_DISABLE_ERRORS: false
+REPOSITORY_GRYPE_DISABLE_ERRORS: false

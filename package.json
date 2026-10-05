@@ -47,10 +47,13 @@
     "typecheck": "tsc --noEmit && tsc -p tsconfig.engine.json --noEmit",
     "lint": "oxlint src/ test/",
     "lint:fix": "oxlint --fix src/ test/",
-    "dist": "npm run build && electron-builder",
-    "dist:mac": "npm run build && electron-builder --mac --x64",
-    "dist:mac:arm64": "npm run build && electron-builder --mac --arm64",
-    "dist:mac:universal": "npm run build && electron-builder --mac --universal"
+    "clean": "rm -rf release/ dist/ dist-electron/",
+    "dist": "npm run clean && npm run build && electron-builder -p never",
+    "dist:mac": "npm run clean && npm run build && electron-builder --mac dmg:x64 -p never",
+    "dist:mac:arm64": "npm run clean && npm run build && electron-builder --mac dmg:arm64 -p never",
+    "dist:mac:all": "npm run clean && npm run build && electron-builder --mac --x64 -p never",
+    "dist:mac:arm64:all": "npm run clean && npm run build && electron-builder --mac --arm64 -p never",
+    "dist:mac:universal": "npm run clean && npm run build && electron-builder --mac --universal -p never"
   },
   "dependencies": {
     "maxmind": "^5.0.7",

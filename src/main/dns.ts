@@ -27,7 +27,7 @@ export async function resolveHostnameWithTimeout(
   // Handle IDN (internationalized domain names) via URL or punycode domain conversion
   let asciiDomain = cleanHost;
   try {
-    const url = new URL(`http://${cleanHost}`);
+    const url = new URL(`https://${cleanHost}`);
     asciiDomain = url.hostname;
   } catch {
     // If not a valid URL format, keep original

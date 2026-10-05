@@ -1,0 +1,13 @@
+{
+  "threshold": 10,
+  "reporters": ["console"],
+  "ignore": [
+    "**/test/**",
+    "**/*.spec.ts",
+    "**/dist/**",
+    "**/dist-electron/**",
+    "**/release/**",
+    "**/node_modules/**",
+    "**/.trunk/**"
+  ]
+}
