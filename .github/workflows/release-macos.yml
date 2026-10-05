@@ -46,7 +46,7 @@ jobs:
 
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
           persist-credentials: false
@@ -114,7 +114,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout Repository
-        uses: actions/checkout@v4.2.2
+        uses: actions/checkout@v7.0.1
         with:
           ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
           persist-credentials: false
