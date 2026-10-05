@@ -6,6 +6,8 @@ import {
   generateUniqueLocal,
   formatResultPlainText,
   calculateSubnet,
+  formatBitClassMap,
+  formatReverseDnsZone,
 } from "../src/engine/index.js";
 
 describe("T1: Subnet Input Parser", () => {
@@ -31,12 +33,12 @@ describe("T1: Subnet Input Parser", () => {
     expect(res2.prefix).toBe(24);
   });
 
-  it("should use default prefix if omitted (32 for IPv4, 128 for IPv6)", () => {
+  it("should use default prefix if omitted (24 for IPv4, 64 for IPv6)", () => {
     const v4 = parseSubnetInput("1.2.3.4");
-    expect(v4.prefix).toBe(32);
+    expect(v4.prefix).toBe(24);
 
     const v6 = parseSubnetInput("2001:db8::1");
-    expect(v6.prefix).toBe(128);
+    expect(v6.prefix).toBe(64);
   });
 
   it("should reject non-contiguous netmasks", () => {
@@ -89,10 +91,19 @@ describe("T2: IPv4 Engine", () => {
       first: "192.168.0.0",
       last: "192.168.0.1",
     });
-    expect(res.role).toBe("broadcast");
+    expect(res.role).toBe("host");
 
     const netRes = calculateIPv4("192.168.0.0", 31);
-    expect(netRes.role).toBe("network");
+    expect(netRes.role).toBe("host");
+    expect(netRes.broadcast).toBeNull();
+  });
+
+  it("identifies both addresses in /31 as usable host interfaces per RFC 3021", () => {
+    const res1 = calculateIPv4("10.0.0.0", 31);
+    const res2 = calculateIPv4("10.0.0.1", 31);
+    expect(res1.role).toBe("host");
+    expect(res2.role).toBe("host");
+    expect(res1.broadcast).toBeNull();
   });
 
   it("should handle /32 single host correctly", () => {
@@ -117,11 +128,12 @@ describe("T2: IPv4 Engine", () => {
     expect(res.properties.some((p) => p.value === "Private")).toBe(true);
   });
 
-  it("should handle 255.255.255.255/32", () => {
+  it("identifies 255.255.255.255 as Class E (Experimental / Reserved)", () => {
     const res = calculateIPv4("255.255.255.255", 32);
     expect(res.network).toBe("255.255.255.255");
     expect(res.hex).toBe("FFFFFFFF");
-    expect(res.properties.some((p) => p.value.includes("Invalid"))).toBe(true);
+    const classProp = res.properties.find((p) => p.key === "Class");
+    expect(classProp?.value).toBe("Class E");
   });
 
   it("should handle multicast 224.0.0.1/24", () => {
@@ -235,5 +247,35 @@ describe("T4: Unique Local IPv6 & Formatter", () => {
       "Host Range     = { 132.252.150.145 - 132.252.150.158 }",
     );
     expect(text).toContain("Class B");
+  });
+});
+
+describe("T5: Bit Classification Map & Reverse DNS Zones", () => {
+  it("generates bit classification string with n, s, h characters", () => {
+    // 10.32.2.52/30 (Class A: 8 net bits, 22 subnet bits, 2 host bits)
+    const map = formatBitClassMap(0x0a200234, 30);
+    expect(map).toBe("nnnnnnnn.ssssssss.ssssssss.sssssshh");
+  });
+
+  it("generates bit classification string for Class B and Class C", () => {
+    // 172.16.1.1/24 (Class B: 16 net bits, 8 subnet bits, 8 host bits)
+    const mapB = formatBitClassMap(0xac100101, 24);
+    expect(mapB).toBe("nnnnnnnn.nnnnnnnn.ssssssss.hhhhhhhh");
+
+    // 192.168.1.1/28 (Class C: 24 net bits, 4 subnet bits, 4 host bits)
+    const mapC = formatBitClassMap(0xc0a80101, 28);
+    expect(mapC).toBe("nnnnnnnn.nnnnnnnn.nnnnnnnn.sssshhhh");
+  });
+
+  it("generates ip6.arpa reverse DNS zone string", () => {
+    const arpa = formatReverseDnsZone("2001:db8::1", 6);
+    expect(arpa).toBe(
+      "1.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.0.8.b.d.0.1.0.0.2.ip6.arpa",
+    );
+  });
+
+  it("generates in-addr.arpa reverse DNS zone string for IPv4", () => {
+    const arpa = formatReverseDnsZone("192.168.1.50", 4);
+    expect(arpa).toBe("50.1.168.192.in-addr.arpa");
   });
 });

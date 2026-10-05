@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-10-05
+
+### Added
+
+- **Mulot SubnetCalc Advanced Feature Integration**:
+  - **FLSM (Fixed Length Subnet Mask) Engine & View**: Pure calculation engine (`src/engine/flsm.ts`) and interactive UI tab (`src/renderer/components/FlsmView.tsx`) with sliders, direct numeric input, summary cards, real-time subnet table, and CSV export.
+  - **VLSM (Variable Length Subnet Mask) Engine & View**: Dynamic descending allocation engine (`src/engine/vlsm.ts`) and interactive UI tab (`src/renderer/components/VlsmView.tsx`) with dynamic subnet addition/removal, live capacity progress bar, efficiency and wasted host calculations, and CSV export.
+  - **CIDR Supernetting & Route Summarization Engine & View**: Pure route aggregation engine (`src/engine/cidr.ts`) and interactive UI tab (`src/renderer/components/CidrView.tsx`) with multi-route textarea, preset quick-buttons, minimal aggregated supernet calculation, and contiguous block validation.
+  - **Bit Classification String (`n`/`s`/`h`)**: Real-time bit pattern visualizer in `BitVisualizer.tsx` displaying classful network (`n`), borrowed subnet (`s`), and host interface (`h`) characters per RFC and Julien Mulot macOS specifications.
+  - **Reverse DNS Zone Strings**: RFC-compliant generation of `.in-addr.arpa` for IPv4 and 32-nibble reversed `.ip6.arpa` for IPv6 in `src/engine/format.ts`.
+  - **RFC 4180 CSV Exporter with Formula Injection Mitigation**: Zero-dependency CSV generation engine (`src/engine/export.ts`) with quotation escaping and spreadsheet formula injection defenses (`=`, `+`, `-`, `@`).
+  - **Tabbed Mode Navigation**: Accessible tab navigation header (`src/renderer/components/TabsHeader.tsx`) switching between `Calculator`, `FLSM (Fixed)`, `VLSM (Variable)`, and `CIDR Supernetting`.
+  - **CSV Download Utility**: Lightweight client-side download utility (`src/renderer/utils/download.ts`) adhering to DRY principle.
+
+### Changed
+
+- Bumped project version to `1.1.0` in `package.json` and `src/renderer/App.tsx`.
+- Enhanced test coverage across all new engines and views (`test/flsm.spec.ts`, `test/vlsm.spec.ts`, `test/cidr.spec.ts`, `test/export.spec.ts`), expanding test suite from 40 to 60 passing tests.
+
+### Fixed
+
+- **RFC 3021 /31 Subnet Host Roles**: Corrected role classification in `src/engine/ipv4.ts` so both addresses on point-to-point links are identified as usable host interfaces rather than network or broadcast addresses.
+- **Class E Boundary Evaluation**: Fixed upper-bound check in `src/engine/ipv4.ts` so `255.255.255.255` is recognized as Class E (Experimental / Reserved) rather than invalid.
+- **Regex Useless Escape Warning**: Cleaned up unnecessary backslash escapes in `src/engine/export.ts` resolving oxlint warning.
+
 ## [1.0.0] - 2026-10-05
 
 ### Added
@@ -57,5 +82,5 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Documentation
 
-- Added comprehensive [`DOCNOTE.md`](DOCNOTE.md) recording 13-pillar code verification report and RFC compliance matrix.
+- Added comprehensive [`DOCNOTE.md`](DOCNOTE.md) recording code verification report and RFC compliance matrix.
 - Added comprehensive [`CHANGELOG.md`](CHANGELOG.md) adhering to Keep a Changelog.

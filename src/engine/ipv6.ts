@@ -1,5 +1,6 @@
 import { CalculateResult, PropertyItem, AddressRole } from "./types.js";
 import { parseIPv6ToBigInt } from "./parse.js";
+import { formatReverseDnsZone } from "./format.js";
 
 const MASK_128 = (1n << 128n) - 1n;
 
@@ -122,6 +123,137 @@ export function extractEUI64Mac(interfaceId: bigint): string | null {
   return null;
 }
 
+function determineIPv6Role(
+  addr: bigint,
+  prefix: number,
+  network: bigint,
+  addrCanon: string,
+  netCanon: string,
+): { role: AddressRole; roleProperty: PropertyItem } {
+  if (addr === 0n && prefix === 128) {
+    return {
+      role: "unspecified",
+      roleProperty: { key: "Role", value: `${addrCanon} is the UNSPECIFIED address` },
+    };
+  }
+  if (addr >> 120n === 0xffn) {
+    return {
+      role: "multicast",
+      roleProperty: { key: "Role", value: `${addrCanon} is a MULTICAST address` },
+    };
+  }
+  if (prefix === 128) {
+    return {
+      role: "host",
+      roleProperty: { key: "Role", value: `${addrCanon} is a HOST address in ${addrCanon}/128` },
+    };
+  }
+  if (addr === network) {
+    return {
+      role: "network",
+      roleProperty: { key: "Role", value: `${addrCanon} is a NETWORK address` },
+    };
+  }
+  return {
+    role: "host",
+    roleProperty: { key: "Role", value: `${addrCanon} is a HOST address in ${netCanon}/${prefix}` },
+  };
+}
+
+function getMulticastScopeName(scopeNibble: number): string {
+  switch (scopeNibble) {
+    case 1:
+      return "interface-local";
+    case 2:
+      return "link-local";
+    case 3:
+      return "realm-local";
+    case 4:
+      return "admin-local";
+    case 5:
+      return "site-local";
+    case 8:
+      return "organization-local";
+    case 0xe:
+      return "global";
+    default:
+      return "reserved";
+  }
+}
+
+function identifyIPv6ScopeProperties(addr: bigint): PropertyItem[] {
+  const firstHextet = Number((addr >> 112n) & 0xffffn);
+
+  if (addr === 0n) {
+    return [{ key: "Scope", value: "Unspecified" }];
+  }
+  if (addr === 1n) {
+    return [{ key: "Scope", value: "Loopback" }];
+  }
+  if (addr >> 120n === 0xffn) {
+    const flags = Number((addr >> 116n) & 0x0fn);
+    const scopeNibble = Number((addr >> 112n) & 0x0fn);
+    const scopeName = getMulticastScopeName(scopeNibble);
+    return [
+      { key: "Multicast Scope", value: scopeName },
+      { key: "Multicast Flags", value: `0x${flags.toString(16)}` },
+    ];
+  }
+  if (addr >> 118n === 0x3f8n) {
+    return [{ key: "Scope", value: "Link-Local Unicast (RFC 4291)" }];
+  }
+  if (addr >> 121n === 0x7en) {
+    const isLocal = ((addr >> 120n) & 1n) === 1n;
+    const globalId = (addr >> 80n) & 0xffffffffffn;
+    const subnetId = (addr >> 64n) & 0xffffn;
+    return [
+      { key: "Scope", value: "Unique Local Unicast (RFC 4193)" },
+      { key: "ULA Type", value: isLocal ? "Locally Assigned (L=1)" : "IETF Reserved (L=0)" },
+      { key: "ULA Global ID", value: `0x${globalId.toString(16).padStart(10, "0")}` },
+      { key: "ULA Subnet ID", value: `0x${subnetId.toString(16).padStart(4, "0")}` },
+    ];
+  }
+  if (firstHextet === 0x2002) {
+    const v4Num = Number((addr >> 80n) & 0xffffffffn);
+    const v4 = `${(v4Num >>> 24) & 0xff}.${(v4Num >>> 16) & 0xff}.${(v4Num >>> 8) & 0xff}.${v4Num & 0xff}`;
+    return [
+      { key: "Scope", value: "6to4 Anycast (RFC 3056)" },
+      { key: "6to4 Encapsulated IPv4", value: v4 },
+    ];
+  }
+  if (addr >> 32n === 0xffffn && addr >> 48n === 0n) {
+    return [{ key: "Scope", value: "IPv4-Mapped (RFC 4291)" }];
+  }
+  if (addr >> 125n === 1n) {
+    return [{ key: "Scope", value: "Global Unicast" }];
+  }
+  return [];
+}
+
+function getGlobalUnicastProperties(addr: bigint, interfaceId: bigint): PropertyItem[] {
+  const h4 = Number((interfaceId >> 48n) & 0xffffn).toString(16).padStart(4, "0");
+  const h5 = Number((interfaceId >> 32n) & 0xffffn).toString(16).padStart(4, "0");
+  const h6 = Number((interfaceId >> 16n) & 0xffffn).toString(16).padStart(4, "0");
+  const h7 = Number(interfaceId & 0xffffn).toString(16).padStart(4, "0");
+  const iidStr = `${h4}:${h5}:${h6}:${h7}`;
+
+  const low24 = Number(addr & 0xffffffn);
+  const snHex1 = ((low24 >>> 16) & 0xff).toString(16).padStart(2, "0");
+  const snHex2 = (low24 & 0xffff).toString(16).padStart(4, "0");
+  const solMulticast = `ff02::1:ff${snHex1}:${snHex2}`;
+
+  const props: PropertyItem[] = [
+    { key: "Interface ID", value: iidStr },
+    { key: "Solicited-Node Multicast", value: solMulticast },
+  ];
+
+  const mac = extractEUI64Mac(interfaceId);
+  if (mac) {
+    props.push({ key: "MAC Address (from EUI-64)", value: mac });
+  }
+  return props;
+}
+
 export function calculateIPv6(ipStr: string, prefix: number): CalculateResult {
   const addr = parseIPv6ToBigInt(ipStr);
   if (addr === null) {
@@ -145,151 +277,22 @@ export function calculateIPv6(ipStr: string, prefix: number): CalculateResult {
   const hex = addr.toString(16).toUpperCase().padStart(32, "0");
   const bits = getIPv6Bits(addr, prefix);
 
-  let role: AddressRole = "host";
-  const properties: PropertyItem[] = [];
-
-  // Determine role
-  if (addr === 0n && prefix === 128) {
-    role = "unspecified";
-    properties.push({
-      key: "Role",
-      value: `${addrCanon} is the UNSPECIFIED address`,
-    });
-  } else if (addr >> 120n === 0xffn) {
-    role = "multicast";
-    properties.push({
-      key: "Role",
-      value: `${addrCanon} is a MULTICAST address`,
-    });
-  } else if (prefix === 128) {
-    role = "host";
-    properties.push({
-      key: "Role",
-      value: `${addrCanon} is a HOST address in ${addrCanon}/128`,
-    });
-  } else if (addr === network) {
-    role = "network";
-    properties.push({
-      key: "Role",
-      value: `${addrCanon} is a NETWORK address`,
-    });
-  } else {
-    role = "host";
-    properties.push({
-      key: "Role",
-      value: `${addrCanon} is a HOST address in ${netCanon}/${prefix}`,
-    });
-  }
-
-  // Address Type Identification
-  const firstHextet = Number((addr >> 112n) & 0xffffn);
-
-  if (addr === 0n) {
-    properties.push({ key: "Scope", value: "Unspecified" });
-  } else if (addr === 1n) {
-    properties.push({ key: "Scope", value: "Loopback" });
-  } else if (addr >> 120n === 0xffn) {
-    // Multicast ff00::/8
-    const flags = Number((addr >> 116n) & 0x0fn);
-    const scopeNibble = Number((addr >> 112n) & 0x0fn);
-    let scopeName = "reserved";
-    switch (scopeNibble) {
-      case 1:
-        scopeName = "interface-local";
-        break;
-      case 2:
-        scopeName = "link-local";
-        break;
-      case 3:
-        scopeName = "realm-local";
-        break;
-      case 4:
-        scopeName = "admin-local";
-        break;
-      case 5:
-        scopeName = "site-local";
-        break;
-      case 8:
-        scopeName = "organization-local";
-        break;
-      case 0xe:
-        scopeName = "global";
-        break;
-    }
-    properties.push({ key: "Multicast Scope", value: scopeName });
-    properties.push({
-      key: "Multicast Flags",
-      value: `0x${flags.toString(16)}`,
-    });
-  } else if (addr >> 118n === 0x3f8n) {
-    // fe80::/10 (fe80 to febf)
-    properties.push({ key: "Scope", value: "Link-Local Unicast (RFC 4291)" });
-  } else if (addr >> 121n === 0x7en) {
-    // fc00::/7 (fc00 to fdff)
-    const isLocal = ((addr >> 120n) & 1n) === 1n; // fd00::/8
-    properties.push({ key: "Scope", value: "Unique Local Unicast (RFC 4193)" });
-    properties.push({
-      key: "ULA Type",
-      value: isLocal ? "Locally Assigned (L=1)" : "IETF Reserved (L=0)",
-    });
-
-    // Global ID: 40 bits (bits 8 to 47)
-    const globalId = (addr >> 80n) & 0xffffffffffn;
-    // Subnet ID: 16 bits (bits 48 to 63)
-    const subnetId = (addr >> 64n) & 0xffffn;
-    properties.push({
-      key: "ULA Global ID",
-      value: `0x${globalId.toString(16).padStart(10, "0")}`,
-    });
-    properties.push({
-      key: "ULA Subnet ID",
-      value: `0x${subnetId.toString(16).padStart(4, "0")}`,
-    });
-  } else if (firstHextet === 0x2002) {
-    // 6to4 (2002::/16)
-    properties.push({ key: "Scope", value: "6to4 Anycast (RFC 3056)" });
-    const v4Num = Number((addr >> 80n) & 0xffffffffn);
-    const v4 = `${(v4Num >>> 24) & 0xff}.${(v4Num >>> 16) & 0xff}.${(v4Num >>> 8) & 0xff}.${v4Num & 0xff}`;
-    properties.push({ key: "6to4 Encapsulated IPv4", value: v4 });
-  } else if (addr >> 32n === 0xffffn && addr >> 48n === 0n) {
-    // IPv4-mapped (::ffff:0:0/96)
-    properties.push({ key: "Scope", value: "IPv4-Mapped (RFC 4291)" });
-  } else if (addr >> 125n === 1n) {
-    // Global Unicast (2000::/3)
-    properties.push({ key: "Scope", value: "Global Unicast" });
-  }
+  const { role, roleProperty } = determineIPv6Role(
+    addr,
+    prefix,
+    network,
+    addrCanon,
+    netCanon,
+  );
+  const properties: PropertyItem[] = [
+    roleProperty,
+    ...identifyIPv6ScopeProperties(addr),
+  ];
 
   // Global Unicast Properties (Interface ID, Solicited Node Multicast, EUI-64)
   if (prefix <= 64 || addr >> 125n === 1n) {
     const interfaceId = addr & 0xffffffffffffffffn;
-    const h4 = Number((interfaceId >> 48n) & 0xffffn)
-      .toString(16)
-      .padStart(4, "0");
-    const h5 = Number((interfaceId >> 32n) & 0xffffn)
-      .toString(16)
-      .padStart(4, "0");
-    const h6 = Number((interfaceId >> 16n) & 0xffffn)
-      .toString(16)
-      .padStart(4, "0");
-    const h7 = Number(interfaceId & 0xffffn)
-      .toString(16)
-      .padStart(4, "0");
-    const iidStr = `${h4}:${h5}:${h6}:${h7}`;
-
-    properties.push({ key: "Interface ID", value: iidStr });
-
-    // Solicited-Node Multicast Address: ff02::1:ffXX:XXXX (lowest 24 bits)
-    const low24 = Number(addr & 0xffffffn);
-    const snHex1 = ((low24 >>> 16) & 0xff).toString(16).padStart(2, "0");
-    const snHex2 = (low24 & 0xffff).toString(16).padStart(4, "0");
-    const solMulticast = `ff02::1:ff${snHex1}:${snHex2}`;
-    properties.push({ key: "Solicited-Node Multicast", value: solMulticast });
-
-    // EUI-64 MAC derivation
-    const mac = extractEUI64Mac(interfaceId);
-    if (mac) {
-      properties.push({ key: "MAC Address (from EUI-64)", value: mac });
-    }
+    properties.push(...getGlobalUnicastProperties(addr, interfaceId));
   }
 
   // Hosts and Range Calculation
@@ -325,5 +328,6 @@ export function calculateIPv6(ipStr: string, prefix: number): CalculateResult {
     role,
     properties,
     warnings: [],
+    reverseDnsZone: formatReverseDnsZone(addrCanon, 6),
   };
 }

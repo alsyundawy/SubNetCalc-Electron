@@ -5,3 +5,7 @@ export * from "./ipv6.js";
 export * from "./uniquelocal.js";
 export * from "./format.js";
 export * from "./calculate.js";
+export * from "./flsm.js";
+export * from "./vlsm.js";
+export * from "./cidr.js";
+export * from "./export.js";

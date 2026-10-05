@@ -55,6 +55,8 @@ export interface CalculateResult {
   dns?: DnsInfo;
   geo?: GeoInfo | null;
   warnings: string[];
+  bitClassMap?: string;
+  reverseDnsZone?: string;
 }
 
 export interface ParseResult {

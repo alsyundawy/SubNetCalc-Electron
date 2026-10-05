@@ -112,6 +112,18 @@ export const BitVisualizer: React.FC<BitVisualizerProps> = ({ result }) => {
       <div className="bit-grid">
         {family === 4 ? renderIPv4Bits() : renderIPv6Bits()}
       </div>
+
+      {family === 4 && result.bitClassMap && (
+        <div className="bit-class-map-row">
+          <span className="bit-class-map-label">Bit Classification:</span>
+          <code className="bit-class-map-code">{result.bitClassMap}</code>
+          <span className="bit-class-map-legend">
+            <span className="map-key">n</span>: Network &bull;{" "}
+            <span className="map-key">s</span>: Subnet &bull;{" "}
+            <span className="map-key">h</span>: Host
+          </span>
+        </div>
+      )}
     </div>
   );
 };

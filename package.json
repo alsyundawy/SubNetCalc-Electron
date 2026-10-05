@@ -1,6 +1,6 @@
 {
   "name": "subnetcalc-electron",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "description": "High-precision IPv4 & IPv6 Subnet Calculator Desktop Application with FLSM, VLSM, CIDR Summarization, and RFC Compliance",
   "keywords": [
     "subnet",

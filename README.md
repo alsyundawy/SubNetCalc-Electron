@@ -17,7 +17,7 @@
 <h3 align="center">High-Precision, Low-Footprint IPv4 & IPv6 Subnet Calculator for macOS & Cross-Platform</h3>
 
 <p align="center">
-  <a href="https://github.com/alsyundawy/SubNetCalc-Electron/releases/latest"><img src="https://img.shields.io/badge/Release-v1.0.0-2ea44f?style=for-the-badge&logo=github&logoColor=white" alt="Latest Release v1.0.0"></a>
+  <a href="https://github.com/alsyundawy/SubNetCalc-Electron/releases/latest"><img src="https://img.shields.io/badge/Release-v1.1.0-2ea44f?style=for-the-badge&logo=github&logoColor=white" alt="Latest Release v1.1.0"></a>
   <a href="https://apple.com/macos"><img src="https://img.shields.io/badge/Platform-macOS%20Sequoia%20%7C%20Sonoma%20%7C%20Ventura-000000?style=for-the-badge&logo=apple&logoColor=white" alt="macOS Platform"></a>
   <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/Engine-Electron%2044%20%7C%20Node%2024-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron Engine"></a>
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/UI-React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19"></a>
@@ -33,7 +33,7 @@
 
 <p align="center">
   <a href="#downloads--artifact-catalogs">
-    <img src="https://img.shields.io/badge/🚀_Download_Artifacts-v1.0.0-238636?style=for-the-badge&logo=cloudsmith&logoColor=white" alt="Download Artifacts">
+    <img src="https://img.shields.io/badge/🚀_Download_Artifacts-v1.1.0-238636?style=for-the-badge&logo=cloudsmith&logoColor=white" alt="Download Artifacts">
   </a>
   <a href="https://github.com/alsyundawy/SubNetCalc-Electron/releases/latest">
     <img src="https://img.shields.io/badge/🪞_Releases_&_Changelog-GitHub-0284c7?style=for-the-badge&logo=github&logoColor=white" alt="Releases & Changelog">
@@ -53,7 +53,7 @@
 > **[`HARRY DERTIN SUTISNA ALSYUNDAWY (@alsyundawy)`](https://github.com/alsyundawy)** —<br>
 > High-performance networking suite for macOS and cross-platform desktop, featuring pure TypeScript subnet engine calculation, 100% test oracle parity with upstream `dreibh/subnetcalc`, GUI ergonomics inspired by `mulot/SubnetCalc`, strict WCAG AAA color contrast, and zero-leak memory watcher governance.
 >
-> 🍏 **[`Latest Releases (v1.0.0)`](https://github.com/alsyundawy/SubNetCalc-Electron/releases/latest)** &nbsp;|&nbsp;
+> 🍏 **[`Latest Releases (v1.1.0)`](https://github.com/alsyundawy/SubNetCalc-Electron/releases/latest)** &nbsp;|&nbsp;
 > 📖 **[`Release DocNotes`](DOCNOTE.md)** &nbsp;|&nbsp;
 > 📜 **[`Changelog`](CHANGELOG.md)** &nbsp;|&nbsp;
 > 📋 **[`Feature Integration Plan`](docs/superpowers/plans/2026-10-05-mulot-subnetcalc-feature-integration.md)** &nbsp;|&nbsp;
@@ -86,7 +86,6 @@
 - [Downloads & Artifact Catalogs](#downloads--artifact-catalogs)
 - [macOS Gatekeeper & Quarantine Removal](#macos-gatekeeper--quarantine-removal)
 - [Developer Setup & Quality Verification](#developer-setup--quality-verification)
-- [13-Pillar Code Review & Quality Report](#13-pillar-code-review--quality-report)
 - [Release DocNotes (DOCNOTE.md)](DOCNOTE.md)
 - [Changelog (v1.0.0)](#changelog-v100)
 - [Upstream Credits & Attribution](#upstream-credits--attribution)
@@ -255,26 +254,6 @@ npm run build
 # Package native macOS installers (.app & .dmg)
 npx electron-builder --mac
 ```
-
----
-
-## 13-Pillar Code Review & Quality Report
-
-SubNetCalc-Electron enforces rigorous standards across every pillar:
-
-- [x] **Pillar 1: Bug Review** — Zero swallowed exceptions, strict type checking, and duplicate IPC handler registration eliminated.
-- [x] **Pillar 2: Syntax Review** — 100% clean TypeScript 7 compilation with `skipLibCheck: true`, explicit JSX spacing, and valid JSON configurations.
-- [x] **Pillar 3: Runtime Review** — Non-blocking DNS lookups with explicit `clearTimeout` timer cleanup, avoiding memory leaks on Node's event loop.
-- [x] **Pillar 4: Logic Review** — Verified calculation parity with upstream `dreibh/subnetcalc` across 40 unit and oracle test vectors.
-- [x] **Pillar 5: Memory Review** — Background memory governance daemon maintaining process RSS strictly within bounds.
-- [x] **Pillar 6: Dead Code Review** — Automated tree-shaking, zero orphaned imports, and zero commented-out code blocks.
-- [x] **Pillar 7: Duplicate Code Review** — Centralized property formatting, shared interfaces, and modular layout components.
-- [x] **Pillar 8: Circular Dependency Review** — Zero circular import chains across engine, main, preload, and renderer layers.
-- [x] **Pillar 9: Performance Bottleneck Review** — Sub-millisecond calculation in renderer process, avoiding synchronous main-process IPC bottlenecks.
-- [x] **Pillar 10: Security Vulnerability Review** — Hardened CSP without `'unsafe-inline'`, `contextIsolation: true`, `nodeIntegration: false`, and 0 vulnerabilities on `npm audit`.
-- [x] **Pillar 11: Maintainability Review** — Modular component hierarchy, clear naming conventions, and comprehensive documentation.
-- [x] **Pillar 12: Scalability Review** — Offline-first local calculation engine supporting millions of continuous subnet transformations.
-- [x] **Pillar 13: Readability Review** — Accessible WCAG AAA high-contrast color scheme, clean JetBrains Mono typography, and documented rationale.
 
 ---
 

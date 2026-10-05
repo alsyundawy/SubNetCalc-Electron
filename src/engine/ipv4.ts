@@ -1,5 +1,6 @@
 import { CalculateResult, PropertyItem, AddressRole } from "./types.js";
 import { parseIPv4ToUint32 } from "./parse.js";
+import { formatBitClassMap, formatReverseDnsZone } from "./format.js";
 
 export function uint32ToIPv4(val: number): string {
   const octet1 = (val >>> 24) & 0xff;
@@ -65,16 +66,11 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
     role = "multicast";
     properties.push({ key: "Role", value: `${ipStr} is a MULTICAST address` });
   } else if (prefix === 31) {
-    if (addr === network) {
-      role = "network";
-      properties.push({ key: "Role", value: `${ipStr} is a NETWORK address` });
-    } else {
-      role = "broadcast";
-      properties.push({
-        key: "Role",
-        value: `${ipStr} is the BROADCAST address of ${netStr}/31`,
-      });
-    }
+    role = "host";
+    properties.push({
+      key: "Role",
+      value: `${ipStr} is a HOST interface in ${netStr}/31 (RFC 3021 Point-to-Point)`,
+    });
   } else if (prefix === 32) {
     role = "host";
     properties.push({
@@ -109,7 +105,7 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
     properties.push({ key: "Class", value: "Class C" });
   } else if (firstOctet <= 239) {
     properties.push({ key: "Class", value: "Class D (Multicast)" });
-  } else if (firstOctet <= 254) {
+  } else if (firstOctet <= 255) {
     properties.push({ key: "Class", value: "Class E" });
   } else {
     properties.push({
@@ -200,5 +196,7 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
     role,
     properties,
     warnings: [],
+    bitClassMap: formatBitClassMap(addr, prefix),
+    reverseDnsZone: formatReverseDnsZone(uint32ToIPv4(addr), 4),
   };
 }

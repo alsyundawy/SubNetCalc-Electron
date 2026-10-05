@@ -36,7 +36,8 @@ export function startMemoryWatch(): void {
     }
 
     if (samples.length === MAX_SAMPLES) {
-      const oldest = samples[0]!;
+      const oldest = samples[0];
+      if (!oldest) return;
       const rssGrowth = (current.rss - oldest.rss) / oldest.rss;
       const heapDelta =
         Math.abs(current.heapUsed - oldest.heapUsed) / oldest.heapUsed;

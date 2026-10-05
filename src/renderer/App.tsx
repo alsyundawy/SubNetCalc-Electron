@@ -7,6 +7,10 @@ import { ResultCards } from "./components/ResultCards.js";
 import { BitVisualizer } from "./components/BitVisualizer.js";
 import { PropertiesList } from "./components/PropertiesList.js";
 import { AboutModal } from "./components/AboutModal.js";
+import { TabsHeader, ActiveTab } from "./components/TabsHeader.js";
+import { FlsmView } from "./components/FlsmView.js";
+import { VlsmView } from "./components/VlsmView.js";
+import { CidrView } from "./components/CidrView.js";
 
 declare global {
   interface Window {
@@ -37,7 +41,7 @@ const resolveHostPortion = async (
   currentRequestId: React.RefObject<number>,
 ): Promise<ResolvedHostResult | null> => {
   const parts = rawInput.split(/[/\s]/);
-  const hostPart = parts[0]!;
+  const hostPart = parts[0] ?? "";
   const remainder = rawInput.substring(hostPart.length);
 
   if (window.subnetcalc?.resolveHostname) {
@@ -132,10 +136,11 @@ export const App: React.FC = () => {
   const [result, setResult] = useState<CalculateResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [appVersion, setAppVersion] = useState("1.0.0");
+  const [appVersion, setAppVersion] = useState("1.1.0");
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("calc");
 
   const currentRequestId = useRef(0);
   const debounceTimer = useRef<NodeJS.Timeout | null>(null);
@@ -306,48 +311,58 @@ export const App: React.FC = () => {
         onOpenAbout={() => setIsAboutOpen(true)}
       />
 
-      <InputBar
-        input={input}
-        setInput={setInput}
-        reverseDns={reverseDns}
-        setReverseDns={setReverseDns}
-        geoip={geoip}
-        setGeoip={setGeoip}
-        uniqueLocal={uniqueLocal}
-        setUniqueLocal={setUniqueLocal}
-        loading={loading}
-        error={error}
-        onCalculate={() => debouncedCalculate(input)}
-        onSelectPreset={(val) => {
-          setInput(val);
-          void executeCalculation(val);
-        }}
-        onClear={() => {
-          setInput("");
-          setError(null);
-        }}
-      />
+      <TabsHeader activeTab={activeTab} onSelectTab={setActiveTab} />
 
-      {result && (
-        <div className="main-content-layout">
-          <div className="content-left-col">
-            <ResultCards result={result} />
-            <BitVisualizer result={result} />
-          </div>
-          <div className="content-right-col">
-            <PropertiesList
-              result={result}
-              history={history}
-              onSelectHistory={(item) => {
-                setInput(item);
-                void executeCalculation(item);
-              }}
-              onCopyText={handleCopyText}
-              onCopyJson={handleCopyJson}
-            />
-          </div>
-        </div>
+      {activeTab === "calc" && (
+        <>
+          <InputBar
+            input={input}
+            setInput={setInput}
+            reverseDns={reverseDns}
+            setReverseDns={setReverseDns}
+            geoip={geoip}
+            setGeoip={setGeoip}
+            uniqueLocal={uniqueLocal}
+            setUniqueLocal={setUniqueLocal}
+            loading={loading}
+            error={error}
+            onCalculate={() => debouncedCalculate(input)}
+            onSelectPreset={(val) => {
+              setInput(val);
+              void executeCalculation(val);
+            }}
+            onClear={() => {
+              setInput("");
+              setError(null);
+            }}
+          />
+
+          {result && (
+            <div className="main-content-layout">
+              <div className="content-left-col">
+                <ResultCards result={result} />
+                <BitVisualizer result={result} />
+              </div>
+              <div className="content-right-col">
+                <PropertiesList
+                  result={result}
+                  history={history}
+                  onSelectHistory={(item) => {
+                    setInput(item);
+                    void executeCalculation(item);
+                  }}
+                  onCopyText={handleCopyText}
+                  onCopyJson={handleCopyJson}
+                />
+              </div>
+            </div>
+          )}
+        </>
       )}
+
+      {activeTab === "flsm" && <FlsmView />}
+      {activeTab === "vlsm" && <VlsmView />}
+      {activeTab === "cidr" && <CidrView />}
 
       <AboutModal
         version={appVersion}

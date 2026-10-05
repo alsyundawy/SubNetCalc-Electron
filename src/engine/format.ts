@@ -1,110 +1,148 @@
 import { CalculateResult } from "./types.js";
+import { parseIPv6ToBigInt } from "./parse.js";
+
+function getGlobalUnicastPropLabel(key: string): string {
+  if (key === "MAC Address (from EUI-64)") {
+    return "MAC Address                     ";
+  }
+  if (key === "Solicited-Node Multicast") {
+    return "Solicited Node Multicast Address";
+  }
+  return "Interface ID                    ";
+}
+
+function formatBitsLines(res: CalculateResult): string[] {
+  if (res.family === 4) {
+    return [`                    ${res.bits.grouped.join(" . ")}`];
+  }
+  return res.bits.grouped.map((group) => `                    ${group}`);
+}
+
+function formatFormula(res: CalculateResult): string {
+  if (res.family === 4) {
+    if (res.prefix === 31 || res.prefix === 32) {
+      return `(2^${res.hostBits} - 0)`;
+    }
+    return `(2^${res.hostBits} - 2)`;
+  }
+  if (res.prefix === 128) {
+    return `(2^0 - 0)`;
+  }
+  return `(2^${res.hostBits} - 1)`;
+}
+
+function formatMaxHostsAndRange(res: CalculateResult): string[] {
+  if (res.role === "multicast") {
+    return [];
+  }
+  const formula = formatFormula(res);
+  const lines: string[] = [`Max. Hosts     = ${res.maxHosts}   ${formula}`];
+  if (res.hostRange) {
+    lines.push(`Host Range     = { ${res.hostRange.first} - ${res.hostRange.last} }`);
+  }
+  return lines;
+}
+
+function formatPropertyLine(
+  prop: { key: string; value: string },
+  lines: string[],
+): void {
+  if (prop.key === "Role" || prop.key === "Class") {
+    lines.push(`   - ${prop.value}`);
+  } else if (prop.key === "Scope" && !prop.value.startsWith("Global")) {
+    lines.push(`   - ${prop.value}`);
+  } else if (
+    prop.key === "Interface ID" ||
+    prop.key === "MAC Address (from EUI-64)" ||
+    prop.key === "Solicited-Node Multicast"
+  ) {
+    const label = getGlobalUnicastPropLabel(prop.key);
+    if (!lines.includes("   - Global Unicast Properties:")) {
+      lines.push("   - Global Unicast Properties:", `      + ${label} = ${prop.value}`);
+    } else {
+      lines.push(`      + ${label} = ${prop.value}`);
+    }
+  } else if (prop.key.startsWith("ULA ")) {
+    const label = prop.key.replace("ULA ", "").padEnd(32, " ");
+    if (!lines.includes("   - Unique Local Unicast Properties:")) {
+      lines.push(
+        "   - Unique Local Unicast Properties:",
+        "      + Locally chosen",
+        `      + ${label} = ${prop.value}`,
+      );
+    } else {
+      lines.push(`      + ${label} = ${prop.value}`);
+    }
+  } else if (prop.key === "Multicast Scope") {
+    lines.push(`      + Scope: ${prop.value}`);
+  } else if (prop.key === "Corresponding Multicast MAC") {
+    lines.push(`      + Corresponding multicast MAC address: ${prop.value}`);
+  } else {
+    lines.push(`   - ${prop.key}: ${prop.value}`);
+  }
+}
 
 export function formatResultPlainText(res: CalculateResult): string {
-  const lines: string[] = [];
+  const broadcastText = res.broadcast
+    ? res.broadcast
+    : "not needed on Point-to-Point links";
 
-  lines.push(`Address        = ${res.address}`);
-
-  // Bits
-  if (res.family === 4) {
-    lines.push(`                    ${res.bits.grouped.join(" . ")}`);
-  } else {
-    for (const group of res.bits.grouped) {
-      lines.push(`                    ${group}`);
-    }
-  }
-
-  lines.push(`Network        = ${res.network} / ${res.prefix}`);
-  lines.push(`Netmask        = ${res.netmask}`);
-
-  if (res.family === 4) {
-    if (res.broadcast) {
-      lines.push(`Broadcast      = ${res.broadcast}`);
-    } else {
-      lines.push(`Broadcast      = not needed on Point-to-Point links`);
-    }
-  }
-
-  lines.push(`Wildcard Mask  = ${res.wildcard}`);
-
-  if (res.family === 4) {
-    lines.push(`Hex. Address   = ${res.hex}`);
-  }
-
-  lines.push(`Host Bits      = ${res.hostBits}`);
-
-  // Max Hosts & Range
-  if (res.role !== "multicast") {
-    let formula = "";
-    if (res.family === 4) {
-      if (res.prefix === 31 || res.prefix === 32) {
-        formula = `(2^${res.hostBits} - 0)`;
-      } else {
-        formula = `(2^${res.hostBits} - 2)`;
-      }
-    } else {
-      if (res.prefix === 128) {
-        formula = `(2^0 - 0)`;
-      } else {
-        formula = `(2^${res.hostBits} - 1)`;
-      }
-    }
-    lines.push(`Max. Hosts     = ${res.maxHosts}   ${formula}`);
-
-    if (res.hostRange) {
-      lines.push(
-        `Host Range     = { ${res.hostRange.first} - ${res.hostRange.last} }`,
-      );
-    }
-  }
-
-  // Properties
-  lines.push(`Properties     = `);
+  const propLines: string[] = [];
   for (const prop of res.properties) {
-    if (prop.key === "Role") {
-      lines.push(`   - ${prop.value}`);
-    } else if (prop.key === "Class") {
-      lines.push(`   - ${prop.value}`);
-    } else if (prop.key === "Scope" && !prop.value.startsWith("Global")) {
-      lines.push(`   - ${prop.value}`);
-    } else if (
-      prop.key === "Interface ID" ||
-      prop.key === "MAC Address (from EUI-64)" ||
-      prop.key === "Solicited-Node Multicast"
-    ) {
-      // Group under Global Unicast Properties if not already printed
-      if (!lines.includes("   - Global Unicast Properties:")) {
-        lines.push(`   - Global Unicast Properties:`);
-      }
-      const label =
-        prop.key === "MAC Address (from EUI-64)"
-          ? "MAC Address                     "
-          : prop.key === "Solicited-Node Multicast"
-            ? "Solicited Node Multicast Address"
-            : "Interface ID                    ";
-      lines.push(`      + ${label} = ${prop.value}`);
-    } else if (prop.key.startsWith("ULA ")) {
-      if (!lines.includes("   - Unique Local Unicast Properties:")) {
-        lines.push(`   - Unique Local Unicast Properties:`);
-        lines.push(`      + Locally chosen`);
-      }
-      const label = prop.key.replace("ULA ", "").padEnd(32, " ");
-      lines.push(`      + ${label} = ${prop.value}`);
-    } else if (prop.key === "Multicast Scope") {
-      lines.push(`      + Scope: ${prop.value}`);
-    } else if (prop.key === "Corresponding Multicast MAC") {
-      lines.push(`      + Corresponding multicast MAC address: ${prop.value}`);
-    } else {
-      lines.push(`   - ${prop.key}: ${prop.value}`);
-    }
+    formatPropertyLine(prop, propLines);
   }
 
-  if (res.dns?.hostname) {
-    lines.push(`DNS Hostname   = ${res.dns.hostname}`);
-  }
-  if (res.geo?.country) {
-    lines.push(`GeoIP Country  = ${res.geo.country} (${res.geo.code})`);
+  const allLines: string[] = [
+    `Address        = ${res.address}`,
+    ...formatBitsLines(res),
+    `Network        = ${res.network} / ${res.prefix}`,
+    `Netmask        = ${res.netmask}`,
+    ...(res.family === 4 ? [`Broadcast      = ${broadcastText}`] : []),
+    `Wildcard Mask  = ${res.wildcard}`,
+    ...(res.family === 4 ? [`Hex. Address   = ${res.hex}`] : []),
+    `Host Bits      = ${res.hostBits}`,
+    ...formatMaxHostsAndRange(res),
+    "Properties     = ",
+    ...propLines,
+    ...(res.dns?.hostname ? [`DNS Hostname   = ${res.dns.hostname}`] : []),
+    ...(res.geo?.country ? [`GeoIP Country  = ${res.geo.country} (${res.geo.code})`] : []),
+  ];
+
+  return allLines.join("\n");
+}
+
+export function formatBitClassMap(addr: number, prefix: number): string {
+  const firstOctet = (addr >>> 24) & 0xff;
+  let classNetBits = 32;
+  if (firstOctet <= 127) classNetBits = 8;
+  else if (firstOctet <= 191) classNetBits = 16;
+  else if (firstOctet <= 223) classNetBits = 24;
+
+  const chars = Array.from({ length: 32 }, (_, i) => {
+    if (i < Math.min(classNetBits, prefix)) return "n";
+    if (i < prefix) return "s";
+    return "h";
+  });
+
+  const octets = Array.from({ length: 4 }, (_, o) =>
+    chars.slice(o * 8, o * 8 + 8).join(""),
+  );
+  return octets.join(".");
+}
+
+export function formatReverseDnsZone(address: string, family: 4 | 6): string {
+  if (family === 4) {
+    const octets = address.trim().split(".");
+    octets.reverse();
+    return `${octets.join(".")}.in-addr.arpa`;
   }
 
-  return lines.join("\n");
+  const val = parseIPv6ToBigInt(address);
+  if (val === null) {
+    throw new Error(`Invalid IPv6 address for reverse DNS: "${address}"`);
+  }
+  const hex32 = val.toString(16).padStart(32, "0");
+  const nibbles = hex32.split("");
+  nibbles.reverse();
+  return `${nibbles.join(".")}.ip6.arpa`;
 }

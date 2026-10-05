@@ -1,8 +1,8 @@
-# [Feature] Mulot/SubnetCalc Advanced Feature Integration & 13-Pillar Hardening Plan
+# [Feature] Mulot/SubnetCalc Advanced Feature Integration & Quality Hardening Plan
 
 > **For agentic workers:** REQUIRED SUB-SKILL: Use `superpowers:subagent-driven-development` or `superpowers:executing-plans` to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
-**Goal:** Integrate the advanced subnetting capabilities of Julien Mulot's macOS `SubnetCalc` (FLSM, VLSM, CIDR Route Summarization, Subnet Bit Mapping, Reverse DNS `ip6.arpa`, CSV Exports) into `SubNetCalc-Electron` while hardening the codebase across all 13 production engineering pillars.
+**Goal:** Integrate the advanced subnetting capabilities of Julien Mulot's macOS `SubnetCalc` (FLSM, VLSM, CIDR Route Summarization, Subnet Bit Mapping, Reverse DNS `ip6.arpa`, CSV Exports) into `SubNetCalc-Electron` while hardening the codebase with comprehensive production engineering verification.
 
 **Architecture:** Extend the pure, zero-dependency calculation engine in `src/engine/` with modular calculation units (`flsm.ts`, `vlsm.ts`, `cidr.ts`, `export.ts`). Expose these through React 19 tabbed views (`Calculator`, `FLSM`, `VLSM`, `Supernetting`) with interactive controls (sliders, dynamic tables, CSV download, bit visualizers).
 
@@ -33,7 +33,7 @@
 - Consumes: `parseIPv4ToUint32`, `uint32ToIPv4`
 - Produces: Corrected `CalculateResult` with accurate roles for `/31` and Class E.
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 it("identifies both addresses in /31 as usable host interfaces per RFC 3021", () => {
@@ -51,14 +51,14 @@ it("identifies 255.255.255.255 as Class E (Experimental / Reserved)", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
       Run: `npm test`
       Expected: FAIL due to role mismatch on `/31` or Class E on `255.255.255.255`.
 
-- [ ] **Step 3: Implement the fix in `src/engine/ipv4.ts`**
+- [x] **Step 3: Implement the fix in `src/engine/ipv4.ts`**
       Update RFC 3021 role logic and Class E boundary check (`firstOctet <= 255`).
 
-- [ ] **Step 4: Run test to verify it passes**
+- [x] **Step 4: Run test to verify it passes**
       Run: `npm test`
       Expected: PASS.
 
@@ -76,7 +76,7 @@ it("identifies 255.255.255.255 as Class E (Experimental / Reserved)", () => {
 
 - Produces: `formatBitClassMap(addr: number, prefix: number): string`, `formatReverseDnsZone(address: string, family: 4 | 6): string`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 it("generates bit classification string with n, s, h characters", () => {
@@ -93,13 +93,13 @@ it("generates ip6.arpa reverse DNS zone string", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
       Run: `npm test`
 
-- [ ] **Step 3: Implement minimal code**
+- [x] **Step 3: Implement minimal code**
       Implement `formatBitClassMap` and `formatReverseDnsZone`.
 
-- [ ] **Step 4: Run test to verify pass**
+- [x] **Step 4: Run test to verify pass**
       Run: `npm test`
       Expected: PASS.
 
@@ -117,7 +117,7 @@ it("generates ip6.arpa reverse DNS zone string", () => {
 
 - Produces: `calculateFLSM(network: string, prefix: number, subnetsNeeded: number): FLSMResult`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 describe("FLSM Calculation", () => {
@@ -134,13 +134,13 @@ describe("FLSM Calculation", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
       Run: `npm test`
 
-- [ ] **Step 3: Implement `calculateFLSM`**
+- [x] **Step 3: Implement `calculateFLSM`**
       Compute required borrowed bits $b = \lceil \log_2(subnetsNeeded) \rceil$, new prefix $p = prefix + b$, and iterate through subnet offsets.
 
-- [ ] **Step 4: Run test to verify pass**
+- [x] **Step 4: Run test to verify pass**
       Run: `npm test`
       Expected: PASS.
 
@@ -158,7 +158,7 @@ describe("FLSM Calculation", () => {
 
 - Produces: `calculateVLSM(network: string, prefix: number, subnets: VLSMRequirement[]): VLSMResult`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 describe("VLSM Calculation", () => {
@@ -184,13 +184,13 @@ describe("VLSM Calculation", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
       Run: `npm test`
 
-- [ ] **Step 3: Implement `calculateVLSM`**
+- [x] **Step 3: Implement `calculateVLSM`**
       Sort requirements descending, find minimal prefix $32 - \lceil \log_2(hosts + 2) \rceil$, verify fit within base address block, calculate subnet ranges, and advance cursor.
 
-- [ ] **Step 4: Run test to verify pass**
+- [x] **Step 4: Run test to verify pass**
       Run: `npm test`
       Expected: PASS.
 
@@ -208,7 +208,7 @@ describe("VLSM Calculation", () => {
 
 - Produces: `summarizeRoutes(routes: string[]): CIDRSummaryResult`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 describe("CIDR Supernetting", () => {
@@ -227,13 +227,13 @@ describe("CIDR Supernetting", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
       Run: `npm test`
 
-- [ ] **Step 3: Implement `summarizeRoutes`**
+- [x] **Step 3: Implement `summarizeRoutes`**
       Find lowest and highest IP bounds, compute common leading bits, and construct aggregate CIDR block.
 
-- [ ] **Step 4: Run test to verify pass**
+- [x] **Step 4: Run test to verify pass**
       Run: `npm test`
       Expected: PASS.
 
@@ -251,7 +251,7 @@ describe("CIDR Supernetting", () => {
 
 - Produces: `exportToCsv<T>(data: T[], columns: { key: keyof T; label: string }[]): string`
 
-- [ ] **Step 1: Write the failing test**
+- [x] **Step 1: Write the failing test**
 
 ```typescript
 describe("CSV Export", () => {
@@ -269,13 +269,13 @@ describe("CSV Export", () => {
 });
 ```
 
-- [ ] **Step 2: Run test to verify failure**
+- [x] **Step 2: Run test to verify failure**
       Run: `npm test`
 
-- [ ] **Step 3: Implement `exportToCsv`**
+- [x] **Step 3: Implement `exportToCsv`**
       Handle string escaping, quotes for commas/newlines, and header row construction.
 
-- [ ] **Step 4: Run test to verify pass**
+- [x] **Step 4: Run test to verify pass**
       Run: `npm test`
       Expected: PASS.
 
@@ -292,35 +292,35 @@ describe("CSV Export", () => {
 - Modify: `src/renderer/App.tsx`
 - Modify: `src/renderer/components/BitVisualizer.tsx`
 
-- [ ] **Step 1: Build Tabs Navigation**
+- [x] **Step 1: Build Tabs Navigation**
       Add top tabs: `Calculator`, `FLSM (Fixed)`, `VLSM (Variable)`, `CIDR Supernetting`.
 
-- [ ] **Step 2: Build `FlsmView.tsx`**
+- [x] **Step 2: Build `FlsmView.tsx`**
       Provide base network input, slider for number of subnets, summary cards, interactive table, and CSV download button.
 
-- [ ] **Step 3: Build `VlsmView.tsx`**
+- [x] **Step 3: Build `VlsmView.tsx`**
       Provide base network input, table of subnets with "Add Subnet" row, custom name input, required hosts input, dynamic calculate trigger, visual allocation progress bar, and CSV export.
 
-- [ ] **Step 4: Build `CidrView.tsx`**
+- [x] **Step 4: Build `CidrView.tsx`**
       Provide multi-route textarea, calculate summarization button, aggregate route card, and contiguous range verification.
 
-- [ ] **Step 5: Enhance `BitVisualizer.tsx`**
+- [x] **Step 5: Enhance `BitVisualizer.tsx`**
       Display character pattern (`nnnnnnnn.ssssssss.ssssssss.sssssshh`) alongside colored bit blocks.
 
 ---
 
-### Task 8: Security, CSP & 13-Pillar Verification
+### Task 8: Security, CSP & Quality Verification
 
 **Files:**
 
 - Modify: `src/renderer/index.html`
 
-- [ ] **Step 1: Harden CSP in `index.html`**
+- [x] **Step 1: Harden CSP in `index.html`**
       Safely declare styles without unsafe sinks.
-- [ ] **Step 2: Run static scanner**
+- [x] **Step 2: Run static scanner**
       Command: `bash ~/.gemini/config/skills/production-code-review/scripts/static-scan.sh .`
-- [ ] **Step 3: Run full typecheck and test suites**
+- [x] **Step 3: Run full typecheck and test suites**
       Command: `npm run typecheck && npm test`
       Expected: All tests pass with exit code `0`.
-- [ ] **Step 4: Verify zero CPU spikes and zero memory leaks**
+- [x] **Step 4: Verify zero CPU spikes and zero memory leaks**
       Inspect exit status and runtime metrics.
