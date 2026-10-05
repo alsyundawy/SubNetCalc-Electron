@@ -2,6 +2,12 @@
 
 <p align="center">
   <a href="https://github.com/alsyundawy/SubNetCalc-Electron">
+    <img src="assets/subnetcalc-desktop-banner.jpg" alt="SubNetCalc Desktop Mac Subnet Calculator Flyer Banner" width="100%">
+  </a>
+</p>
+
+<p align="center">
+  <a href="https://github.com/alsyundawy/SubNetCalc-Electron">
     <img src="build/icon.png" width="128" height="128" alt="SubNetCalc-Electron Desktop Application Icon">
   </a>
 </p>
