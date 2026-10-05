@@ -85,7 +85,8 @@
 - [Changelog (v1.0.0)](#changelog-v100)
 - [Upstream Credits & Attribution](#upstream-credits--attribution)
 - [FAQ & Troubleshooting](#faq--troubleshooting)
-- [Support & Donation](#support--donation)
+- [📬 Maintainer & Contact](#-maintainer--contact)
+- [💖 Support & Donation](#-support--donation)
 - [License](#license)
 
 ---
@@ -317,12 +318,43 @@ Submit an issue on our [GitHub Issue Tracker](https://github.com/alsyundawy/SubN
 
 ---
 
-## Support & Donation
+## 📬 Maintainer & Contact
 
-If SubNetCalc-Electron makes your daily networking and sysadmin workflows easier, contributions to support ongoing maintenance and tool development are warmly appreciated:
+For questions, feature requests, security disclosures, or collaboration:
 
-- 💖 **PayPal**: [https://www.paypal.me/alsyundawy](https://www.paypal.me/alsyundawy)
-- ☕ **GitHub Sponsors**: [https://github.com/sponsors/alsyundawy](https://github.com/sponsors/alsyundawy)
+- **Lead Maintainer & Engineering**: **HARRY DERTIN SUTISNA** — [`ALSYUNDAWY IT SOLUTION`](https://alsyundawy.com)
+- **Official Website**: [`https://alsyundawy.com`](https://alsyundawy.com) (ALSYUNDAWY IT SOLUTION)
+- **GitHub Profile**: [`https://github.com/alsyundawy`](https://github.com/alsyundawy)
+- **X (Twitter)**: [`@alsyundawy`](https://x.com/alsyundawy)
+- **Telegram**: [`@alsyundawy`](https://t.me/alsyundawy)
+- **Email**: [`alsyundawy@gmail.com`](mailto:alsyundawy@gmail.com)
+- **Repository**: [`https://github.com/alsyundawy/SubNetCalc-Electron`](https://github.com/alsyundawy/SubNetCalc-Electron)
+- **Sponsorship / Donation**: [`PayPal Donate`](https://paypal.me/alsyundawy)
+
+---
+
+## 💖 Support & Donation
+
+If **SubNetCalc-Electron** has helped you design, optimize, or troubleshoot your network architectures, consider supporting its continuous maintenance, security audits, and hosting infrastructure:
+
+### 💳 International Support: PayPal
+
+[![Donate with PayPal](https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white)](https://www.paypal.me/alsyundawy)
+
+- **PayPal Link**: [`https://www.paypal.me/alsyundawy`](https://www.paypal.me/alsyundawy)
+
+### 🇮🇩 Indonesian & Regional Support: QRIS (Quick Response Code Indonesian Standard)
+
+Scan the QRIS barcode below using any Indonesian mobile banking application (BCA, Mandiri, BRI, BNI, BSI, CIMB Niaga, Permata) or e-wallet (GoPay, OVO, DANA, LinkAja, ShopeePay):
+
+![QRIS Donation Barcode - ALSYUNDAWY](https://github.com/user-attachments/assets/a0126f28-6dde-43da-ba14-d7c9a27de0df)
+
+- **Merchant / Account Name**: **ALSYUNDAWY**
+- **NMID**: **`ID1020021153676`**
+- **Direct Barcode Asset Link**: [`https://github.com/user-attachments/assets/a0126f28-6dde-43da-ba14-d7c9a27de0df`](https://github.com/user-attachments/assets/a0126f28-6dde-43da-ba14-d7c9a27de0df)
+- **Direct WhatsApp Confirmation**: [`https://wa.me/6285658515212`](https://wa.me/6285658515212) (`+62 856-5851-5212`)
+
+Your generosity directly supports open-source development, security hardening, and future tooling for the network engineering community.
 
 ---
 
