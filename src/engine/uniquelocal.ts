@@ -14,7 +14,7 @@ export interface UniqueLocalResult {
  */
 export function generateUniqueLocal(
   ipv6Str: string,
-  random5Bytes: Uint8Array
+  random5Bytes: Uint8Array,
 ): UniqueLocalResult {
   if (random5Bytes.length !== 5) {
     throw new Error("random5Bytes must be exactly 5 bytes (40 bits)");

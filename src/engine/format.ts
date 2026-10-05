@@ -52,7 +52,9 @@ export function formatResultPlainText(res: CalculateResult): string {
     lines.push(`Max. Hosts     = ${res.maxHosts}   ${formula}`);
 
     if (res.hostRange) {
-      lines.push(`Host Range     = { ${res.hostRange.first} - ${res.hostRange.last} }`);
+      lines.push(
+        `Host Range     = { ${res.hostRange.first} - ${res.hostRange.last} }`,
+      );
     }
   }
 
@@ -65,16 +67,21 @@ export function formatResultPlainText(res: CalculateResult): string {
       lines.push(`   - ${prop.value}`);
     } else if (prop.key === "Scope" && !prop.value.startsWith("Global")) {
       lines.push(`   - ${prop.value}`);
-    } else if (prop.key === "Interface ID" || prop.key === "MAC Address (from EUI-64)" || prop.key === "Solicited-Node Multicast") {
+    } else if (
+      prop.key === "Interface ID" ||
+      prop.key === "MAC Address (from EUI-64)" ||
+      prop.key === "Solicited-Node Multicast"
+    ) {
       // Group under Global Unicast Properties if not already printed
       if (!lines.includes("   - Global Unicast Properties:")) {
         lines.push(`   - Global Unicast Properties:`);
       }
-      const label = prop.key === "MAC Address (from EUI-64)" 
-        ? "MAC Address                     " 
-        : prop.key === "Solicited-Node Multicast" 
-        ? "Solicited Node Multicast Address" 
-        : "Interface ID                    ";
+      const label =
+        prop.key === "MAC Address (from EUI-64)"
+          ? "MAC Address                     "
+          : prop.key === "Solicited-Node Multicast"
+            ? "Solicited Node Multicast Address"
+            : "Interface ID                    ";
       lines.push(`      + ${label} = ${prop.value}`);
     } else if (prop.key.startsWith("ULA ")) {
       if (!lines.includes("   - Unique Local Unicast Properties:")) {

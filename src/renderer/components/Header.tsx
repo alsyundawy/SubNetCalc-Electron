@@ -17,11 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   return (
     <header className="app-header">
       <div className="brand-section">
-        <img
-          src={appIcon}
-          alt="SubNetCalc Logo"
-          className="brand-logo-img"
-        />
+        <img src={appIcon} alt="SubNetCalc Logo" className="brand-logo-img" />
         <div>
           <div className="brand-title">
             SubNetCalc{" "}
@@ -37,7 +33,9 @@ export const Header: React.FC<HeaderProps> = ({
         <button
           className="btn-icon"
           onClick={onToggleTheme}
-          title={theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          title={
+            theme === "dark" ? "Switch to Light Mode" : "Switch to Dark Mode"
+          }
           aria-label="Toggle theme"
         >
           {theme === "dark" ? "☀️" : "🌙"}

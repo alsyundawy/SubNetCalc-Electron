@@ -1,6 +1,7 @@
 export type AddressFamily = 4 | 6;
 
-export type AddressRole = "host" | "network" | "broadcast" | "multicast" | "unspecified";
+export type AddressRole =
+  "host" | "network" | "broadcast" | "multicast" | "unspecified";
 
 export interface PropertyItem {
   key: string;

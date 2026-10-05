@@ -63,8 +63,15 @@ export const BitVisualizer: React.FC<BitVisualizerProps> = ({ result }) => {
       });
 
       return (
-        <div key={`v6-hex-${hexLabel}-${hIndex}`} className="bit-octet-box" style={{ marginBottom: "2px" }}>
-          <div className="bit-octet-label" style={{ fontFamily: "var(--font-mono)" }}>
+        <div
+          key={`v6-hex-${hexLabel}-${hIndex}`}
+          className="bit-octet-box"
+          style={{ marginBottom: "2px" }}
+        >
+          <div
+            className="bit-octet-label"
+            style={{ fontFamily: "var(--font-mono)" }}
+          >
             {hexLabel}
           </div>
           <div className="bit-octet-digits">{cells}</div>
@@ -78,8 +85,15 @@ export const BitVisualizer: React.FC<BitVisualizerProps> = ({ result }) => {
       <div className="bit-header">
         <div className="section-title">
           <span>Binary Bit Visualization</span>
-          <span style={{ fontSize: "12px", color: "var(--text-dim)", fontWeight: "normal" }}>
-            ({prefix} Network bits / {family === 4 ? 32 - prefix : 128 - prefix} Host bits)
+          <span
+            style={{
+              fontSize: "12px",
+              color: "var(--text-dim)",
+              fontWeight: "normal",
+            }}
+          >
+            ({prefix} Network bits / {family === 4 ? 32 - prefix : 128 - prefix}{" "}
+            Host bits)
           </span>
         </div>
 

@@ -12,7 +12,7 @@ export function uint32ToIPv4(val: number): string {
 export function prefixToMask32(prefix: number): number {
   if (prefix === 0) return 0;
   if (prefix === 32) return 0xffffffff;
-  return ((0xffffffff << (32 - prefix)) >>> 0);
+  return (0xffffffff << (32 - prefix)) >>> 0;
 }
 
 export function getIPv4Bits(val: number, prefix: number) {
@@ -42,7 +42,7 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
   }
 
   const mask = prefixToMask32(prefix);
-  const wildcard = (~mask) >>> 0;
+  const wildcard = ~mask >>> 0;
   const network = (addr & mask) >>> 0;
   const broadcastNum = (network | wildcard) >>> 0;
 
@@ -70,21 +70,33 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
       properties.push({ key: "Role", value: `${ipStr} is a NETWORK address` });
     } else {
       role = "broadcast";
-      properties.push({ key: "Role", value: `${ipStr} is the BROADCAST address of ${netStr}/31` });
+      properties.push({
+        key: "Role",
+        value: `${ipStr} is the BROADCAST address of ${netStr}/31`,
+      });
     }
   } else if (prefix === 32) {
     role = "host";
-    properties.push({ key: "Role", value: `${ipStr} is a HOST address in ${ipStr}/32` });
+    properties.push({
+      key: "Role",
+      value: `${ipStr} is a HOST address in ${ipStr}/32`,
+    });
   } else {
     if (addr === network) {
       role = "network";
       properties.push({ key: "Role", value: `${ipStr} is a NETWORK address` });
     } else if (addr === broadcastNum) {
       role = "broadcast";
-      properties.push({ key: "Role", value: `${ipStr} is the BROADCAST address of ${netStr}/${prefix}` });
+      properties.push({
+        key: "Role",
+        value: `${ipStr} is the BROADCAST address of ${netStr}/${prefix}`,
+      });
     } else {
       role = "host";
-      properties.push({ key: "Role", value: `${ipStr} is a HOST address in ${netStr}/${prefix}` });
+      properties.push({
+        key: "Role",
+        value: `${ipStr} is a HOST address in ${netStr}/${prefix}`,
+      });
     }
   }
 
@@ -100,15 +112,26 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
   } else if (firstOctet <= 254) {
     properties.push({ key: "Class", value: "Class E" });
   } else {
-    properties.push({ key: "Class", value: "Invalid (not in class A, B, C or D)" });
+    properties.push({
+      key: "Class",
+      value: "Invalid (not in class A, B, C or D)",
+    });
   }
 
   // Special Class D multicast details
   if (isMulticast) {
     let scope = "global";
-    if (firstOctet === 224 && ((addr >>> 16) & 0xff) === 0 && ((addr >>> 8) & 0xff) === 0) {
+    if (
+      firstOctet === 224 &&
+      ((addr >>> 16) & 0xff) === 0 &&
+      ((addr >>> 8) & 0xff) === 0
+    ) {
       scope = "link-local";
-    } else if (firstOctet === 224 && ((addr >>> 16) & 0xff) === 0 && ((addr >>> 8) & 0xff) === 1) {
+    } else if (
+      firstOctet === 224 &&
+      ((addr >>> 16) & 0xff) === 0 &&
+      ((addr >>> 8) & 0xff) === 1
+    ) {
       scope = "internetwork control";
     } else if (firstOctet === 239) {
       scope = "administratively scoped";
@@ -152,7 +175,7 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
       maxHosts = "2";
       hostRange = { first: netStr, last: uint32ToIPv4(network + 1) };
     } else {
-      const hostsNum = (2 ** hostBits) - 2;
+      const hostsNum = 2 ** hostBits - 2;
       maxHosts = hostsNum.toString();
       hostRange = {
         first: uint32ToIPv4(network + 1),

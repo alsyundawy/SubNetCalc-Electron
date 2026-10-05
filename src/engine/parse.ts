@@ -1,13 +1,16 @@
 import { AddressFamily, ParseResult } from "./types.js";
 
 // Helper: check if a 32-bit unsigned number is contiguous bitmask (1s followed by 0s)
-export function isContiguousMask32(val: number): { valid: boolean; prefix: number } {
+export function isContiguousMask32(val: number): {
+  valid: boolean;
+  prefix: number;
+} {
   // If val is 0, prefix is 0
   if (val === 0) return { valid: true, prefix: 0 };
-  
+
   // In 32-bit uint: ~val + 1 should be a power of 2 (i.e. (n & (n - 1)) === 0)
   // where n is the inverted mask + 1 in unsigned 32-bit
-  const inv = (~val) >>> 0;
+  const inv = ~val >>> 0;
   if (((inv + 1) & inv) === 0) {
     // Count leading ones
     let count = 0;
@@ -24,12 +27,15 @@ export function isContiguousMask32(val: number): { valid: boolean; prefix: numbe
 }
 
 // Helper: check if 128-bit BigInt is contiguous bitmask
-export function isContiguousMask128(val: bigint): { valid: boolean; prefix: number } {
+export function isContiguousMask128(val: bigint): {
+  valid: boolean;
+  prefix: number;
+} {
   if (val === 0n) return { valid: true, prefix: 0 };
   const mask128 = (1n << 128n) - 1n;
   if (val < 0n || val > mask128) return { valid: false, prefix: -1 };
 
-  const inv = (~val) & mask128;
+  const inv = ~val & mask128;
   if (((inv + 1n) & inv) === 0n) {
     let count = 0;
     for (let i = 127n; i >= 0n; i--) {
@@ -118,7 +124,10 @@ export function detectFamily(addrStr: string): AddressFamily | null {
   return null;
 }
 
-export function parseSubnetInput(input: string, explicitPrefix?: string): ParseResult {
+export function parseSubnetInput(
+  input: string,
+  explicitPrefix?: string,
+): ParseResult {
   const trimmed = input.trim();
   if (!trimmed) {
     throw new Error("Input string is empty");
@@ -176,12 +185,16 @@ export function parseSubnetInput(input: string, explicitPrefix?: string): ParseR
       const num = parseInt(maskPart, 10);
       if (family === 4) {
         if (num < 0 || num > 32) {
-          throw new Error(`IPv4 prefix /${num} is out of range (must be between 0 and 32)`);
+          throw new Error(
+            `IPv4 prefix /${num} is out of range (must be between 0 and 32)`,
+          );
         }
         prefix = num;
       } else {
         if (num < 0 || num > 128) {
-          throw new Error(`IPv6 prefix /${num} is out of range (must be between 0 and 128)`);
+          throw new Error(
+            `IPv6 prefix /${num} is out of range (must be between 0 and 128)`,
+          );
         }
         prefix = num;
       }
@@ -194,7 +207,9 @@ export function parseSubnetInput(input: string, explicitPrefix?: string): ParseR
         }
         const check = isContiguousMask32(u32);
         if (!check.valid) {
-          throw new Error(`Non-contiguous IPv4 netmask is not allowed: "${maskPart}"`);
+          throw new Error(
+            `Non-contiguous IPv4 netmask is not allowed: "${maskPart}"`,
+          );
         }
         prefix = check.prefix;
       } else {
@@ -204,7 +219,9 @@ export function parseSubnetInput(input: string, explicitPrefix?: string): ParseR
         }
         const check = isContiguousMask128(u128);
         if (!check.valid) {
-          throw new Error(`Non-contiguous IPv6 netmask is not allowed: "${maskPart}"`);
+          throw new Error(
+            `Non-contiguous IPv6 netmask is not allowed: "${maskPart}"`,
+          );
         }
         prefix = check.prefix;
       }

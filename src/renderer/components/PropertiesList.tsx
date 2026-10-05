@@ -67,7 +67,14 @@ export const PropertiesList: React.FC<PropertiesListProps> = ({
           <>
             {/* DNS / GeoIP Row */}
             {(result.dns || result.geo) && (
-              <div style={{ display: "flex", gap: "6px", flexWrap: "wrap", padding: "2px 0 6px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  gap: "6px",
+                  flexWrap: "wrap",
+                  padding: "2px 0 6px",
+                }}
+              >
                 {result.dns && (
                   <div
                     style={{
@@ -101,9 +108,19 @@ export const PropertiesList: React.FC<PropertiesListProps> = ({
 
             {/* Warnings */}
             {result.warnings.length > 0 && (
-              <div style={{ display: "flex", flexDirection: "column", gap: "2px", marginBottom: "4px" }}>
+              <div
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  gap: "2px",
+                  marginBottom: "4px",
+                }}
+              >
                 {result.warnings.map((w, idx) => (
-                  <div key={`warn-${idx}-${w}`} style={{ fontSize: "10px", color: "var(--accent-amber)" }}>
+                  <div
+                    key={`warn-${idx}-${w}`}
+                    style={{ fontSize: "10px", color: "var(--accent-amber)" }}
+                  >
                     ℹ️ {w}
                   </div>
                 ))}
@@ -122,7 +139,14 @@ export const PropertiesList: React.FC<PropertiesListProps> = ({
         ) : (
           <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
             {history.length === 0 ? (
-              <div style={{ fontSize: "11px", color: "var(--text-dim)", padding: "12px 0", textAlign: "center" }}>
+              <div
+                style={{
+                  fontSize: "11px",
+                  color: "var(--text-dim)",
+                  padding: "12px 0",
+                  textAlign: "center",
+                }}
+              >
                 No calculations yet in history.
               </div>
             ) : (

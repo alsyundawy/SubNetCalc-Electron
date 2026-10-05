@@ -113,7 +113,9 @@ export function extractEUI64Mac(interfaceId: bigint): string | null {
     const b4 = bytes[6] ?? 0;
     const b5 = bytes[7] ?? 0;
 
-    const hexParts = [b0, b1, b2, b3, b4, b5].map((b) => b.toString(16).padStart(2, "0"));
+    const hexParts = [b0, b1, b2, b3, b4, b5].map((b) =>
+      b.toString(16).padStart(2, "0"),
+    );
     return hexParts.join(":");
   }
 
@@ -130,7 +132,7 @@ export function calculateIPv6(ipStr: string, prefix: number): CalculateResult {
   }
 
   const mask = prefixToMask128(prefix);
-  const wildcard = (~mask) & MASK_128;
+  const wildcard = ~mask & MASK_128;
   const network = addr & mask;
   const lastAddr = network | wildcard;
 
@@ -149,19 +151,34 @@ export function calculateIPv6(ipStr: string, prefix: number): CalculateResult {
   // Determine role
   if (addr === 0n && prefix === 128) {
     role = "unspecified";
-    properties.push({ key: "Role", value: `${addrCanon} is the UNSPECIFIED address` });
-  } else if ((addr >> 120n) === 0xffn) {
+    properties.push({
+      key: "Role",
+      value: `${addrCanon} is the UNSPECIFIED address`,
+    });
+  } else if (addr >> 120n === 0xffn) {
     role = "multicast";
-    properties.push({ key: "Role", value: `${addrCanon} is a MULTICAST address` });
+    properties.push({
+      key: "Role",
+      value: `${addrCanon} is a MULTICAST address`,
+    });
   } else if (prefix === 128) {
     role = "host";
-    properties.push({ key: "Role", value: `${addrCanon} is a HOST address in ${addrCanon}/128` });
+    properties.push({
+      key: "Role",
+      value: `${addrCanon} is a HOST address in ${addrCanon}/128`,
+    });
   } else if (addr === network) {
     role = "network";
-    properties.push({ key: "Role", value: `${addrCanon} is a NETWORK address` });
+    properties.push({
+      key: "Role",
+      value: `${addrCanon} is a NETWORK address`,
+    });
   } else {
     role = "host";
-    properties.push({ key: "Role", value: `${addrCanon} is a HOST address in ${netCanon}/${prefix}` });
+    properties.push({
+      key: "Role",
+      value: `${addrCanon} is a HOST address in ${netCanon}/${prefix}`,
+    });
   }
 
   // Address Type Identification
@@ -171,56 +188,92 @@ export function calculateIPv6(ipStr: string, prefix: number): CalculateResult {
     properties.push({ key: "Scope", value: "Unspecified" });
   } else if (addr === 1n) {
     properties.push({ key: "Scope", value: "Loopback" });
-  } else if ((addr >> 120n) === 0xffn) {
+  } else if (addr >> 120n === 0xffn) {
     // Multicast ff00::/8
     const flags = Number((addr >> 116n) & 0x0fn);
     const scopeNibble = Number((addr >> 112n) & 0x0fn);
     let scopeName = "reserved";
     switch (scopeNibble) {
-      case 1: scopeName = "interface-local"; break;
-      case 2: scopeName = "link-local"; break;
-      case 3: scopeName = "realm-local"; break;
-      case 4: scopeName = "admin-local"; break;
-      case 5: scopeName = "site-local"; break;
-      case 8: scopeName = "organization-local"; break;
-      case 0xe: scopeName = "global"; break;
+      case 1:
+        scopeName = "interface-local";
+        break;
+      case 2:
+        scopeName = "link-local";
+        break;
+      case 3:
+        scopeName = "realm-local";
+        break;
+      case 4:
+        scopeName = "admin-local";
+        break;
+      case 5:
+        scopeName = "site-local";
+        break;
+      case 8:
+        scopeName = "organization-local";
+        break;
+      case 0xe:
+        scopeName = "global";
+        break;
     }
     properties.push({ key: "Multicast Scope", value: scopeName });
-    properties.push({ key: "Multicast Flags", value: `0x${flags.toString(16)}` });
-  } else if ((addr >> 118n) === 0x3f8n) { // fe80::/10 (fe80 to febf)
+    properties.push({
+      key: "Multicast Flags",
+      value: `0x${flags.toString(16)}`,
+    });
+  } else if (addr >> 118n === 0x3f8n) {
+    // fe80::/10 (fe80 to febf)
     properties.push({ key: "Scope", value: "Link-Local Unicast (RFC 4291)" });
-  } else if ((addr >> 121n) === 0x7en) { // fc00::/7 (fc00 to fdff)
+  } else if (addr >> 121n === 0x7en) {
+    // fc00::/7 (fc00 to fdff)
     const isLocal = ((addr >> 120n) & 1n) === 1n; // fd00::/8
     properties.push({ key: "Scope", value: "Unique Local Unicast (RFC 4193)" });
-    properties.push({ key: "ULA Type", value: isLocal ? "Locally Assigned (L=1)" : "IETF Reserved (L=0)" });
-    
+    properties.push({
+      key: "ULA Type",
+      value: isLocal ? "Locally Assigned (L=1)" : "IETF Reserved (L=0)",
+    });
+
     // Global ID: 40 bits (bits 8 to 47)
     const globalId = (addr >> 80n) & 0xffffffffffn;
     // Subnet ID: 16 bits (bits 48 to 63)
     const subnetId = (addr >> 64n) & 0xffffn;
-    properties.push({ key: "ULA Global ID", value: `0x${globalId.toString(16).padStart(10, "0")}` });
-    properties.push({ key: "ULA Subnet ID", value: `0x${subnetId.toString(16).padStart(4, "0")}` });
+    properties.push({
+      key: "ULA Global ID",
+      value: `0x${globalId.toString(16).padStart(10, "0")}`,
+    });
+    properties.push({
+      key: "ULA Subnet ID",
+      value: `0x${subnetId.toString(16).padStart(4, "0")}`,
+    });
   } else if (firstHextet === 0x2002) {
     // 6to4 (2002::/16)
     properties.push({ key: "Scope", value: "6to4 Anycast (RFC 3056)" });
     const v4Num = Number((addr >> 80n) & 0xffffffffn);
     const v4 = `${(v4Num >>> 24) & 0xff}.${(v4Num >>> 16) & 0xff}.${(v4Num >>> 8) & 0xff}.${v4Num & 0xff}`;
     properties.push({ key: "6to4 Encapsulated IPv4", value: v4 });
-  } else if ((addr >> 32n) === 0xffffn && (addr >> 48n) === 0n) {
+  } else if (addr >> 32n === 0xffffn && addr >> 48n === 0n) {
     // IPv4-mapped (::ffff:0:0/96)
     properties.push({ key: "Scope", value: "IPv4-Mapped (RFC 4291)" });
-  } else if ((addr >> 125n) === 1n) {
+  } else if (addr >> 125n === 1n) {
     // Global Unicast (2000::/3)
     properties.push({ key: "Scope", value: "Global Unicast" });
   }
 
   // Global Unicast Properties (Interface ID, Solicited Node Multicast, EUI-64)
-  if (prefix <= 64 || (addr >> 125n) === 1n) {
+  if (prefix <= 64 || addr >> 125n === 1n) {
     const interfaceId = addr & 0xffffffffffffffffn;
-    const h4 = Number((interfaceId >> 48n) & 0xffffn).toString(16).padStart(4, "0");
-    const h5 = Number((interfaceId >> 32n) & 0xffffn).toString(16).padStart(4, "0");
-    const h6 = Number((interfaceId >> 16n) & 0xffffn).toString(16).padStart(4, "0");
-    const h7 = Number(interfaceId & 0xffffn).toString(16).padStart(4, "0");
+    const h4 = Number((interfaceId >> 48n) & 0xffffn)
+      .toString(16)
+      .padStart(4, "0");
+    const h5 = Number((interfaceId >> 32n) & 0xffffn)
+      .toString(16)
+      .padStart(4, "0");
+    const h6 = Number((interfaceId >> 16n) & 0xffffn)
+      .toString(16)
+      .padStart(4, "0");
+    const h7 = Number(interfaceId & 0xffffn)
+      .toString(16)
+      .padStart(4, "0");
     const iidStr = `${h4}:${h5}:${h6}:${h7}`;
 
     properties.push({ key: "Interface ID", value: iidStr });

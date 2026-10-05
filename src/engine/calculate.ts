@@ -6,19 +6,23 @@ import { generateUniqueLocal } from "./uniquelocal.js";
 
 export function calculateSubnet(
   req: CalculateRequest,
-  rng5Bytes?: Uint8Array
+  rng5Bytes?: Uint8Array,
 ): CalculateResult {
   const parsed = parseSubnetInput(req.input, req.prefix);
   const warnings: string[] = [];
 
   if (parsed.zoneIndex) {
-    warnings.push(`IPv6 zone index "%${parsed.zoneIndex}" ignored in subnet calculations`);
+    warnings.push(
+      `IPv6 zone index "%${parsed.zoneIndex}" ignored in subnet calculations`,
+    );
   }
 
   // Handle Unique Local generation if requested
   if (req.uniqueLocal) {
     if (parsed.family === 4) {
-      throw new Error("Unique Local IPv6 address generation is not valid for IPv4 addresses");
+      throw new Error(
+        "Unique Local IPv6 address generation is not valid for IPv4 addresses",
+      );
     }
 
     if (!rng5Bytes) {
