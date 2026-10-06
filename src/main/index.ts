@@ -25,7 +25,7 @@ function createWindow(): void {
     center: true,
     show: false,
     backgroundColor: "#090d16",
-    title: "SubNetCalc",
+    title: "SubNetCalc Electron",
     webPreferences: {
       preload: path.join(__dirname, "../preload/index.js"),
       contextIsolation: true,

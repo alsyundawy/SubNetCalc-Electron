@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.1] - 2026-10-06
+
+### Rebranded
+
+- Renamed application to **SubNetCalc Electron** across configuration, window titles, document titles, headers, and metadata (`package.json`, `electron-builder.yml`, `src/main/index.ts`, `src/renderer/index.html`).
+
+### Added
+
+- **Multi-Theme Engine (14 Authentic Palettes)**:
+  - Rebased theme architecture to mirror `SubnetCalc-MacOS` (`ThemeManager.swift`), replacing the dual light/dark toggle with a comprehensive 14-palette engine:
+    - **Catppuccin**: Mocha, Macchiato, Frappé, Latte
+    - **Dracula**: Official vampiric contrast theme
+    - **Gruvbox**: Dark & Light retro groove palettes
+    - **Solarized**: Dark & Light precision palettes
+    - **Tomorrow**: Night Blue, Night, Eighties, Night Bright, Day
+  - Full theme persistence using `localStorage` and real-time DOM CSS variable injection via `applyThemeToDocument`.
+- **Live RFC IP Classification Badges**:
+  - Integrated real-time IP classifier (`src/renderer/utils/classifier.ts`) rendering dynamic pill badges for RFC 1918 Private, Public Internet, CGNAT RFC 6598, Loopback, Link-Local, Documentation, Multicast, Reserved, ULA RFC 4193, and GUA RFC 4291.
+- **Cloud Architecture Preset Profiles**:
+  - Added dedicated architecture profile dropdown in `InputBar.tsx` for one-click subnet inspection covering AWS VPC, GCP Subnets, Azure VNets, Docker Bridge, Kubernetes Pod Networks, Tailscale CGNAT, Point-to-Point RFC 3021, and IPv6 ULA/GUA.
+- **Modernized & Elegant About Modal**:
+  - Completely redesigned `AboutModal.tsx` and styling with macOS card layout, frosted glassmorphism backdrop (`backdrop-filter: blur(20px)`), 4-pillar technical architecture grid, author and sponsorship cards, upstream heritage attribution, RFC compliance matrix, and keyboard shortcut hints.
+
+### Fixed
+
+- **Prefix /0 Bitwise Truncation**:
+  - Fixed edge-case bug in `src/engine/flsm.ts` and `src/engine/vlsm.ts` where `2 ** 32 >>> 0` truncated to `0` due to JavaScript 32-bit unsigned bitwise coercion. Added explicit boundary checks ensuring total capacity of 4,294,967,296 hosts for `/0` subnets.
+- Added comprehensive unit test coverage for `/0` boundaries in `test/flsm.spec.ts` and `test/vlsm.spec.ts`.
+
+### Security & Quality Verification
+
+- 100% clean passes across TypeScript strict typechecking (`tsc --noEmit`), Oxlint, Trunk linter, Vitest (62 passing tests), and Vite production bundling.
+
+---
+
 ## [1.1.0] - 2026-10-05
 
 ### Added

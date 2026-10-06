@@ -39,8 +39,19 @@ describe("VLSM Calculation", () => {
     expect(() => calculateVLSM("192.168.0.0", 24, reqs)).toThrow(/exceeds/i);
   });
 
+  it("handles /0 parent network boundary without capacity overflow", () => {
+    const reqs = [{ name: "Large Cloud Subnet", hostsNeeded: 1000 }];
+    const res = calculateVLSM("0.0.0.0", 0, reqs);
+    expect(res.basePrefix).toBe(0);
+    expect(res.totalCapacity).toBe(4294967296);
+    expect(res.allocations[0]!.prefix).toBe(22);
+    expect(res.allocations[0]!.allocatedHosts).toBe(1024);
+  });
+
   it("throws descriptive error for invalid IP or empty requirements", () => {
-    expect(() => calculateVLSM("invalid.ip", 24, [{ name: "A", hostsNeeded: 10 }])).toThrow(/invalid/i);
+    expect(() =>
+      calculateVLSM("invalid.ip", 24, [{ name: "A", hostsNeeded: 10 }]),
+    ).toThrow(/invalid/i);
     expect(() => calculateVLSM("192.168.0.0", 24, [])).toThrow(/at least one/i);
   });
 });

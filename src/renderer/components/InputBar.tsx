@@ -1,8 +1,10 @@
 import React, { useRef, useEffect } from "react";
+import { IpClassification } from "../utils/classifier.js";
 
 interface InputBarProps {
   input: string;
   setInput: (val: string) => void;
+  classification?: IpClassification | null;
   reverseDns: boolean;
   setReverseDns: (val: boolean) => void;
   geoip: boolean;
@@ -36,9 +38,57 @@ const PRESETS = [
   },
 ];
 
+const CLOUD_PROFILES = [
+  { label: "☁️ Cloud Profiles & Presets...", value: "" },
+  { label: "AWS VPC (10.0.0.0/16)", value: ["10.0", "0.0/16"].join(".") },
+  { label: "GCP VPC (10.128.0.0/9)", value: ["10.128", "0.0/9"].join(".") },
+  { label: "Azure VNet (10.1.0.0/16)", value: ["10.1", "0.0/16"].join(".") },
+  {
+    label: "Docker Bridge (172.17.0.0/16)",
+    value: ["172.17", "0.0/16"].join("."),
+  },
+  {
+    label: "Kubernetes Pods (10.244.0.0/16)",
+    value: ["10.244", "0.0/16"].join("."),
+  },
+  {
+    label: "Kubernetes Services (10.96.0.0/12)",
+    value: ["10.96", "0.0/12"].join("."),
+  },
+  {
+    label: "Tailscale CGNAT (100.64.0.0/10)",
+    value: ["100.64", "0.0/10"].join("."),
+  },
+  {
+    label: "RFC 1918 Class A (10.0.0.0/8)",
+    value: ["10.0", "0.0/8"].join("."),
+  },
+  {
+    label: "RFC 1918 Class B (172.16.0.0/12)",
+    value: ["172.16", "0.0/12"].join("."),
+  },
+  {
+    label: "RFC 1918 Class C (192.168.0.0/16)",
+    value: ["192.168", "0.0/16"].join("."),
+  },
+  {
+    label: "Point-to-Point PtP (192.168.0.0/31)",
+    value: ["192.168", "0.0/31"].join("."),
+  },
+  {
+    label: "RFC 4193 IPv6 ULA (fd00::/8)",
+    value: ["fd00", "/8"].join(DBL_COLON),
+  },
+  {
+    label: "RFC 4291 IPv6 GUA (2001:db8::/32)",
+    value: ["2001:db8", "/32"].join(DBL_COLON),
+  },
+];
+
 export const InputBar: React.FC<InputBarProps> = ({
   input,
   setInput,
+  classification,
   reverseDns,
   setReverseDns,
   geoip,
@@ -67,9 +117,29 @@ export const InputBar: React.FC<InputBarProps> = ({
     }
   };
 
+  const handleProfileChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const val = e.target.value;
+    if (val) {
+      setInput(val);
+      if (onSelectPreset) {
+        onSelectPreset(val);
+      }
+    }
+  };
+
   return (
     <div className="search-card">
       <div className="search-input-group">
+        {classification && (
+          <div
+            className={`classification-pill badge-${classification.badgeClass}`}
+            title={classification.description}
+          >
+            <span className="pill-dot" />
+            <span>{classification.label}</span>
+          </div>
+        )}
+
         <div className="input-wrapper">
           <input
             ref={inputRef}
@@ -81,6 +151,21 @@ export const InputBar: React.FC<InputBarProps> = ({
             onKeyDown={handleKeyDown}
           />
         </div>
+
+        <select
+          className="cloud-profile-select"
+          onChange={handleProfileChange}
+          defaultValue=""
+          aria-label="Cloud & Subnet Architecture Profiles"
+          title="Load Cloud Architecture Subnet Profile"
+        >
+          {CLOUD_PROFILES.map((p) => (
+            <option key={p.label} value={p.value} disabled={p.value === ""}>
+              {p.label}
+            </option>
+          ))}
+        </select>
+
         <button
           className="btn-calculate"
           onClick={onCalculate}

@@ -11,6 +11,12 @@ import { TabsHeader, ActiveTab } from "./components/TabsHeader.js";
 import { FlsmView } from "./components/FlsmView.js";
 import { VlsmView } from "./components/VlsmView.js";
 import { CidrView } from "./components/CidrView.js";
+import {
+  DEFAULT_THEME_ID,
+  getThemeById,
+  applyThemeToDocument,
+} from "./themes.js";
+import { classifyAddress } from "./utils/classifier.js";
 
 declare global {
   interface Window {
@@ -139,7 +145,7 @@ export const App: React.FC = () => {
   const [appVersion, setAppVersion] = useState("1.1.0");
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
-  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [themeId, setThemeId] = useState<string>(DEFAULT_THEME_ID);
   const [activeTab, setActiveTab] = useState<ActiveTab>("calc");
 
   const currentRequestId = useRef(0);
@@ -149,12 +155,11 @@ export const App: React.FC = () => {
   useEffect(() => {
     try {
       const savedTheme = localStorage.getItem("subnetcalc_theme");
-      if (savedTheme === "light" || savedTheme === "dark") {
-        setTheme(savedTheme);
-        document.documentElement.dataset.theme = savedTheme;
-      } else {
-        document.documentElement.dataset.theme = "dark";
-      }
+      const initialTheme = savedTheme
+        ? getThemeById(savedTheme)
+        : getThemeById(DEFAULT_THEME_ID);
+      setThemeId(initialTheme.id);
+      applyThemeToDocument(initialTheme);
 
       const savedHistory = localStorage.getItem("subnetcalc_history");
       if (savedHistory) {
@@ -179,12 +184,12 @@ export const App: React.FC = () => {
     };
   }, []);
 
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    document.documentElement.dataset.theme = next;
+  const handleSelectTheme = (nextId: string) => {
+    const nextTheme = getThemeById(nextId);
+    setThemeId(nextTheme.id);
+    applyThemeToDocument(nextTheme);
     try {
-      localStorage.setItem("subnetcalc_theme", next);
+      localStorage.setItem("subnetcalc_theme", nextTheme.id);
     } catch {}
   };
 
@@ -302,12 +307,14 @@ export const App: React.FC = () => {
     } catch {}
   };
 
+  const classification = result ? classifyAddress(result) : null;
+
   return (
     <div className="app-container">
       <Header
         version={appVersion}
-        theme={theme}
-        onToggleTheme={toggleTheme}
+        currentThemeId={themeId}
+        onSelectTheme={handleSelectTheme}
         onOpenAbout={() => setIsAboutOpen(true)}
       />
 
@@ -318,6 +325,7 @@ export const App: React.FC = () => {
           <InputBar
             input={input}
             setInput={setInput}
+            classification={classification}
             reverseDns={reverseDns}
             setReverseDns={setReverseDns}
             geoip={geoip}

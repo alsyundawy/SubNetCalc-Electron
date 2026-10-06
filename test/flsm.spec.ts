@@ -38,6 +38,17 @@ describe("FLSM Calculation", () => {
     expect(() => calculateFLSM("192.168.1.0", 31, 4)).toThrow(/exceeds/i);
   });
 
+  it("handles /0 prefix boundary accurately without 32-bit overflow", () => {
+    const res = calculateFLSM("0.0.0.0", 0, 1);
+    expect(res.allocatedPrefix).toBe(0);
+    expect(res.totalSubnetsCreated).toBe(1);
+    expect(res.usableHostsPerSubnet).toBe(4294967294);
+    expect(res.subnets[0]?.totalHosts).toBe(4294967296);
+    expect(res.subnets[0]?.broadcast).toBe("255.255.255.255");
+    expect(res.subnets[0]?.hostRange.first).toBe("0.0.0.1");
+    expect(res.subnets[0]?.hostRange.last).toBe("255.255.255.254");
+  });
+
   it("throws error for invalid IP or negative subnets", () => {
     expect(() => calculateFLSM("invalid.ip", 24, 4)).toThrow(/invalid/i);
     expect(() => calculateFLSM("192.168.1.0", 24, 0)).toThrow(/at least 1/i);

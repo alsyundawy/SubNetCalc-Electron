@@ -39,194 +39,259 @@ export function AboutModal({
         tabIndex={-1}
       />
 
-      <div className="modal-content">
+      <div className="modal-content about-modal-elegant">
+        {/* Modal Header */}
         <div className="modal-header">
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <div className="about-header-branding">
             <img
               src={appIcon}
-              alt="SubNetCalc Logo"
-              style={{ width: "28px", height: "28px", objectFit: "contain" }}
+              alt="SubNetCalc Electron Logo"
+              className="about-header-icon"
             />
-            <div id="about-modal-title" className="modal-title">
-              About SubNetCalc-Electron
+            <div>
+              <div id="about-modal-title" className="modal-title">
+                SubNetCalc Electron
+              </div>
+              <div className="about-subtitle-row">
+                <span className="about-tag">Desktop Suite</span>
+                <span className="about-tag tag-accent">
+                  v{version || "1.1.1"}
+                </span>
+                <span className="about-tag tag-muted">MIT License</span>
+              </div>
             </div>
           </div>
           <button
             type="button"
-            className="btn-icon"
+            className="btn-icon modal-close-btn"
             onClick={onClose}
             aria-label="Close dialog"
+            title="Close"
           >
             ✕
           </button>
         </div>
 
-        <div className="modal-body">
-          <p>
-            <strong>SubNetCalc-Electron</strong> is a high-precision IPv4 and
-            IPv6 Subnet Calculator desktop application designed with modern
-            engineering standards and an interactive user interface.
-          </p>
+        {/* Modal Scrollable Body */}
+        <div className="modal-body about-scroll-content">
+          {/* Mission & Overview Hero */}
+          <section className="about-hero-card">
+            <p className="about-mission-text">
+              <strong>SubNetCalc Electron</strong> is a production-grade,
+              ultra-fast IPv4 &amp; IPv6 Subnet Calculator desktop application.
+              Engineered with deterministic pure bitwise arithmetic, instant
+              mask synchronization, bitmapped visualizers, FLSM/VLSM
+              decomposition, CIDR aggregation, and an authentic 14-palette
+              multi-theme engine.
+            </p>
+          </section>
 
-          <p>
-            <strong>Version:</strong> v{version || "1.0.0"}
-            <br />
-            <strong>License:</strong> MIT License
-            <br />
-            <strong>Engine:</strong> Pure TypeScript Calculation Engine
-          </p>
+          {/* Technical Specs & Capabilities Grid */}
+          <section className="about-section-group">
+            <div className="about-section-title">
+              ⚡ Engineering Architecture &amp; Capabilities
+            </div>
+            <div className="about-grid-capabilities">
+              <div className="about-feature-box">
+                <span className="about-feature-icon">🚀</span>
+                <div>
+                  <strong>Sub-Millisecond Engine</strong>
+                  <p>
+                    Synchronous bitwise shifts executed locally with zero DOM
+                    lag.
+                  </p>
+                </div>
+              </div>
+              <div className="about-feature-box">
+                <span className="about-feature-icon">🎨</span>
+                <div>
+                  <strong>14 Multi-Theme Engine</strong>
+                  <p>
+                    Catppuccin, Dracula, Gruvbox, Solarized, and Tomorrow
+                    palettes.
+                  </p>
+                </div>
+              </div>
+              <div className="about-feature-box">
+                <span className="about-feature-icon">🔒</span>
+                <div>
+                  <strong>Zero-Telemetry &amp; Offline</strong>
+                  <p>
+                    100% private. Strict sandbox context isolation and CSP
+                    defense.
+                  </p>
+                </div>
+              </div>
+              <div className="about-feature-box">
+                <span className="about-feature-icon">📊</span>
+                <div>
+                  <strong>FLSM &amp; VLSM Suite</strong>
+                  <p>
+                    Hierarchical allocations, efficiency analytics, and CSV
+                    exports.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
 
-          <div
-            style={{
-              background: "rgba(59, 130, 246, 0.08)",
-              border: "1px solid rgba(59, 130, 246, 0.25)",
-              borderRadius: "8px",
-              padding: "12px",
-            }}
-          >
-            <strong style={{ color: "var(--accent-primary, #60a5fa)" }}>
-              Author &amp; Repository:
-            </strong>
-            <p style={{ marginTop: "4px" }}>
-              Developed &amp; Maintained by:{" "}
-              <strong>Harry Dertin Sutisna Alsyundawy</strong>
-              {" ("}
+          {/* Maintainer & Author Card */}
+          <section className="about-card-author">
+            <div className="about-card-title">👨‍💻 Author &amp; Maintainer</div>
+            <p className="about-author-name">
+              <strong>Harry Dertin Sutisna Alsyundawy</strong>{" "}
               <a
                 href="https://github.com/alsyundawy"
                 target="_blank"
                 rel="noreferrer"
+                className="about-link"
               >
-                @alsyundawy
+                (@alsyundawy)
               </a>
-              {")"}
             </p>
-            <p style={{ marginTop: "4px" }}>
-              Contact Email:{" "}
-              <a href="mailto:alsyundawy@gmail.com">alsyundawy@gmail.com</a>
+            <p className="about-org-info">
+              Alsyundawy IT Solution • Bandung, Indonesia
             </p>
-            <p style={{ marginTop: "4px" }}>
-              Repository:{" "}
+
+            <div className="about-links-row">
               <a
                 href="https://github.com/alsyundawy/SubNetCalc-Electron"
                 target="_blank"
                 rel="noreferrer"
+                className="about-link-pill"
               >
-                https://github.com/alsyundawy/SubNetCalc-Electron
+                📦 GitHub Repository
               </a>
-            </p>
-            <p style={{ marginTop: "4px" }}>
-              Issue Tracker:{" "}
               <a
                 href="https://github.com/alsyundawy/SubNetCalc-Electron/issues"
                 target="_blank"
                 rel="noreferrer"
+                className="about-link-pill"
               >
-                github.com/alsyundawy/SubNetCalc-Electron/issues
+                🐛 Issue Tracker
               </a>
-            </p>
-            <div
-              style={{
-                marginTop: "8px",
-                display: "flex",
-                gap: "10px",
-                flexWrap: "wrap",
-                fontSize: "11px",
-              }}
-            >
+              <a href="mailto:alsyundawy@gmail.com" className="about-link-pill">
+                ✉️ alsyundawy@gmail.com
+              </a>
+            </div>
+
+            <div className="about-donation-row">
               <a
                 href="https://www.paypal.me/alsyundawy"
                 target="_blank"
                 rel="noreferrer"
-                style={{
-                  background: "rgba(255, 255, 255, 0.08)",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  textDecoration: "none",
-                }}
+                className="btn-donate paypal"
               >
-                💖 Donate via PayPal
+                💖 Support via PayPal
               </a>
               <a
                 href="https://github.com/sponsors/alsyundawy"
                 target="_blank"
                 rel="noreferrer"
-                style={{
-                  background: "rgba(255, 255, 255, 0.08)",
-                  padding: "4px 8px",
-                  borderRadius: "4px",
-                  display: "inline-flex",
-                  alignItems: "center",
-                  gap: "4px",
-                  textDecoration: "none",
-                }}
+                className="btn-donate github"
               >
                 ☕ Sponsor on GitHub
               </a>
             </div>
-          </div>
+          </section>
 
-          <div
-            style={{
-              background: "rgba(255, 255, 255, 0.04)",
-              border: "1px solid var(--border-color)",
-              borderRadius: "8px",
-              padding: "12px",
-            }}
-          >
-            <strong style={{ color: "var(--accent-primary, #60a5fa)" }}>
-              Upstream Heritage &amp; Attribution:
-            </strong>
-            <p style={{ marginTop: "6px" }}>
-              <strong>1. Dr. Thomas Dreibholz</strong>
-              {" ("}
-              <a
-                href="https://github.com/dreibh/subnetcalc"
-                target="_blank"
-                rel="noreferrer"
-              >
-                dreibh/subnetcalc
-              </a>
-              {
-                "): Canonical IPv4/IPv6 CLI subnet calculation engine, exact RFC property definitions, and algorithmic test oracle parity."
-              }
-            </p>
-            <p style={{ marginTop: "6px" }}>
-              <strong>2. Julien Mulot</strong>
-              {" ("}
-              <a
-                href="https://github.com/mulot/SubnetCalc"
-                target="_blank"
-                rel="noreferrer"
-              >
-                mulot/SubnetCalc
-              </a>
-              {" / "}
-              <a
-                href="https://subnetcalc.mulot.org"
-                target="_blank"
-                rel="noreferrer"
-              >
-                subnetcalc.mulot.org
-              </a>
-              {
-                "): Classic macOS Subnet Calculator GUI, pioneering interactive mask synchronization, FLSM, VLSM, CIDR summarization, and data exports."
-              }
-            </p>
-          </div>
+          {/* Upstream Heritage Card */}
+          <section className="about-card-heritage">
+            <div className="about-card-title">
+              🍏 Upstream Heritage &amp; Attribution
+            </div>
+            <ul className="about-heritage-list">
+              <li>
+                <strong>1. Dr. Thomas Dreibholz</strong>
+                {" ("}
+                <a
+                  href="https://github.com/dreibh/subnetcalc"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="about-link"
+                >
+                  dreibh/subnetcalc
+                </a>
+                {"): "}
+                Canonical IPv4/IPv6 CLI subnet calculation algorithm, exact RFC
+                property logic, and test oracle parity.
+              </li>
+              <li>
+                <strong>2. Julien Mulot</strong>
+                {" ("}
+                <a
+                  href="https://github.com/mulot/SubnetCalc"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="about-link"
+                >
+                  mulot/SubnetCalc
+                </a>
+                {" / "}
+                <a
+                  href="https://subnetcalc.mulot.org"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="about-link"
+                >
+                  subnetcalc.mulot.org
+                </a>
+                {"): "}
+                Original Apple AppKit Cocoa macOS subnet calculator creator,
+                pioneering interactive mask synchronization and classic GUI
+                subnetting.
+              </li>
+              <li>
+                <strong>3. Harry Dertin Sutisna Alsyundawy</strong>
+                {" ("}
+                <a
+                  href="https://github.com/alsyundawy/SubnetCalc-MacOS"
+                  target="_blank"
+                  rel="noreferrer"
+                  className="about-link"
+                >
+                  alsyundawy/SubnetCalc-MacOS
+                </a>
+                {"): "}
+                Modernized Swift 6 Universal 2 macOS edition with 14
+                multi-themes, cloud profiles, and CI/CD automation.
+              </li>
+            </ul>
+          </section>
 
-          <p style={{ fontSize: "11.5px", color: "var(--text-secondary)" }}>
-            Supported Standards: RFC 791 (IPv4), RFC 4291 (IPv6 Architecture),
-            RFC 4193 (Unique Local IPv6), RFC 5952 (Canonical IPv6 Format), RFC
-            3021 (31-bit PtP Links), RFC 1918 (Private Address Allocation), RFC
-            4180 (CSV Format).
-          </p>
+          {/* Supported RFC Standards */}
+          <section className="about-standards-footer">
+            <div className="about-standards-heading">
+              📜 Supported Standards &amp; RFC Compliance:
+            </div>
+            <p className="about-standards-text">
+              RFC 791 (IPv4) • RFC 4291 (IPv6 Architecture) • RFC 4193 (Unique
+              Local IPv6 ULA) • RFC 5952 (Canonical IPv6) • RFC 3021 (31-bit PtP
+              Links) • RFC 1918 (Private IPv4) • RFC 6598 (Shared / CGNAT) • RFC
+              4180 (Spreadsheet-Safe CSV Export).
+            </p>
+          </section>
+
+          {/* Keyboard Shortcuts */}
+          <section className="about-shortcuts-row">
+            <span className="shortcut-badge">
+              <kbd>Enter</kbd> Calculate
+            </span>
+            <span className="shortcut-badge">
+              <kbd>Esc</kbd> Clear / Close
+            </span>
+            <span className="shortcut-badge">
+              <kbd>Tab</kbd> Focus
+            </span>
+          </section>
         </div>
 
+        {/* Modal Footer */}
         <div className="modal-footer">
-          <button type="button" className="btn-secondary" onClick={onClose}>
+          <div className="modal-footer-copy">
+            © 2026 Harry Dertin Sutisna Alsyundawy. All rights reserved.
+          </div>
+          <button type="button" className="btn-primary" onClick={onClose}>
             Close
           </button>
         </div>

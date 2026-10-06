@@ -24,6 +24,36 @@ export interface FLSMResult {
   subnets: FLSMSubnet[];
 }
 
+function computeUsableHosts(prefix: number, subnetSize: number): number {
+  if (prefix === 0) return 4294967294;
+  if (prefix <= 30) return subnetSize - 2;
+  if (prefix === 31) return 2;
+  return 1;
+}
+
+function computeHostRange(
+  prefix: number,
+  subAddr: number,
+  bcastNum: number,
+): { first: string; last: string } {
+  if (prefix <= 30) {
+    return {
+      first: uint32ToIPv4(subAddr + 1),
+      last: uint32ToIPv4(bcastNum - 1),
+    };
+  }
+  if (prefix === 31) {
+    return {
+      first: uint32ToIPv4(subAddr),
+      last: uint32ToIPv4(bcastNum),
+    };
+  }
+  return {
+    first: uint32ToIPv4(subAddr),
+    last: uint32ToIPv4(subAddr),
+  };
+}
+
 export function calculateFLSM(
   networkInput: string,
   prefix: number,
@@ -53,40 +83,21 @@ export function calculateFLSM(
 
   const mask = prefixToMask32(prefix);
   const networkStart = (baseAddr & mask) >>> 0;
-  const subnetSize = 2 ** (32 - allocatedPrefix) >>> 0;
+  const subnetSize =
+    allocatedPrefix === 0 ? 4294967296 : (2 ** (32 - allocatedPrefix)) >>> 0;
   const allocMask = prefixToMask32(allocatedPrefix);
   const allocMaskStr = uint32ToIPv4(allocMask);
   const wildcardStr = uint32ToIPv4(~allocMask >>> 0);
 
   const countToGenerate = Math.min(subnetsNeeded, 4096);
   const subnets: FLSMSubnet[] = [];
-
-  let usableHosts = 0;
-  if (allocatedPrefix <= 30) {
-    usableHosts = subnetSize - 2;
-  } else if (allocatedPrefix === 31) {
-    usableHosts = 2;
-  } else {
-    usableHosts = 1;
-  }
+  const usableHosts = computeUsableHosts(allocatedPrefix, subnetSize);
 
   for (let i = 0; i < countToGenerate; i++) {
     const subAddr = (networkStart + i * subnetSize) >>> 0;
-    const bcastNum = (subAddr + subnetSize - 1) >>> 0;
-
-    let firstHost = "";
-    let lastHost = "";
-
-    if (allocatedPrefix <= 30) {
-      firstHost = uint32ToIPv4(subAddr + 1);
-      lastHost = uint32ToIPv4(bcastNum - 1);
-    } else if (allocatedPrefix === 31) {
-      firstHost = uint32ToIPv4(subAddr);
-      lastHost = uint32ToIPv4(bcastNum);
-    } else {
-      firstHost = uint32ToIPv4(subAddr);
-      lastHost = uint32ToIPv4(subAddr);
-    }
+    const bcastNum =
+      allocatedPrefix === 0 ? 0xffffffff : (subAddr + subnetSize - 1) >>> 0;
+    const hostRange = computeHostRange(allocatedPrefix, subAddr, bcastNum);
 
     subnets.push({
       index: i + 1,
@@ -95,7 +106,7 @@ export function calculateFLSM(
       netmask: allocMaskStr,
       wildcard: wildcardStr,
       broadcast: uint32ToIPv4(bcastNum),
-      hostRange: { first: firstHost, last: lastHost },
+      hostRange,
       totalHosts: subnetSize,
       usableHosts,
     });

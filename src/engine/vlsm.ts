@@ -66,7 +66,7 @@ function computeAllocationBlock(hostsNeeded: number): {
   const neededWithOverhead = hostsNeeded + 2;
   const power = Math.ceil(Math.log2(Math.max(neededWithOverhead, 4)));
   const allocPrefix = 32 - power;
-  const blockSize = 2 ** power >>> 0;
+  const blockSize = (2 ** power) >>> 0;
   return { allocPrefix, blockSize };
 }
 
@@ -107,8 +107,8 @@ export function calculateVLSM(
 
   const parentMask = prefixToMask32(prefix);
   const baseNet = (baseAddr & parentMask) >>> 0;
-  const totalCapacity = 2 ** (32 - prefix) >>> 0;
-  const parentEnd = (baseNet + totalCapacity) >>> 0;
+  const totalCapacity = prefix === 0 ? 4294967296 : (2 ** (32 - prefix)) >>> 0;
+  const parentEnd = prefix === 0 ? 4294967296 : baseNet + totalCapacity;
 
   let cursor = baseNet;
   let totalNeeded = 0;
