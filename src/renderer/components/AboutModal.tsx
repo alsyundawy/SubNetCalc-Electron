@@ -223,8 +223,22 @@ export function AboutModal({
         {/* Modal Header with Draggable Gripper */}
         <div
           className="modal-header draggable-header"
+          role="region"
+          aria-label="Draggable dialog header"
+          tabIndex={0}
           onMouseDown={handleHeaderMouseDown}
           onTouchStart={handleHeaderTouchStart}
+          onKeyDown={(e) => {
+            if (e.key === "ArrowUp") {
+              setPosition((p) => ({ ...p, y: Math.max(20, p.y - 10) }));
+            } else if (e.key === "ArrowDown") {
+              setPosition((p) => ({ ...p, y: p.y + 10 }));
+            } else if (e.key === "ArrowLeft") {
+              setPosition((p) => ({ ...p, x: Math.max(20, p.x - 10) }));
+            } else if (e.key === "ArrowRight") {
+              setPosition((p) => ({ ...p, x: p.x + 10 }));
+            }
+          }}
           title="Click and drag to move this dialog"
         >
           <div className="about-header-branding">

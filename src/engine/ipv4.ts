@@ -81,6 +81,176 @@ export function getIPv4Bits(val: number, prefix: number) {
   return { network, host, grouped };
 }
 
+interface RoleResult {
+  role: AddressRole;
+  property: PropertyItem;
+}
+
+function determineIPv4Role(
+  addr: number,
+  network: number,
+  broadcastNum: number,
+  prefix: number,
+  isMulticast: boolean,
+  ipStr: string,
+  netStr: string,
+): RoleResult {
+  if (isMulticast) {
+    return {
+      role: "multicast",
+      property: { key: "Role", value: `${ipStr} is a MULTICAST address` },
+    };
+  }
+  if (prefix === 31) {
+    return {
+      role: "host",
+      property: {
+        key: "Role",
+        value: `${ipStr} is a HOST interface in ${netStr}/31 (RFC 3021 Point-to-Point)`,
+      },
+    };
+  }
+  if (prefix === 32) {
+    return {
+      role: "host",
+      property: {
+        key: "Role",
+        value: `${ipStr} is a HOST address in ${ipStr}/32`,
+      },
+    };
+  }
+  if (addr === network) {
+    return {
+      role: "network",
+      property: { key: "Role", value: `${ipStr} is a NETWORK address` },
+    };
+  }
+  if (addr === broadcastNum) {
+    return {
+      role: "broadcast",
+      property: {
+        key: "Role",
+        value: `${ipStr} is the BROADCAST address of ${netStr}/${prefix}`,
+      },
+    };
+  }
+  return {
+    role: "host",
+    property: {
+      key: "Role",
+      value: `${ipStr} is a HOST address in ${netStr}/${prefix}`,
+    },
+  };
+}
+
+function getIPv4ClassProperty(firstOctet: number): PropertyItem {
+  if (firstOctet <= 127) {
+    return { key: "Class", value: "Class A" };
+  }
+  if (firstOctet <= 191) {
+    return { key: "Class", value: "Class B" };
+  }
+  if (firstOctet <= 223) {
+    return { key: "Class", value: "Class C" };
+  }
+  if (firstOctet <= 239) {
+    return { key: "Class", value: "Class D (Multicast)" };
+  }
+  if (firstOctet <= 255) {
+    return { key: "Class", value: "Class E" };
+  }
+  return { key: "Class", value: "Invalid (not in class A, B, C or D)" };
+}
+
+function getIPv4MulticastProperties(
+  addr: number,
+  firstOctet: number,
+): PropertyItem[] {
+  const octet2 = (addr >>> 16) & 0xff;
+  const octet3 = (addr >>> 8) & 0xff;
+
+  let scope = "global";
+  if (firstOctet === 224 && octet2 === 0 && octet3 === 0) {
+    scope = "link-local";
+  } else if (firstOctet === 224 && octet2 === 0 && octet3 === 1) {
+    scope = "internetwork control";
+  } else if (firstOctet === 239) {
+    scope = "administratively scoped";
+  }
+
+  const lower23 = addr & 0x7fffff;
+  const b1 = (lower23 >>> 16) & 0x7f;
+  const b2 = (lower23 >>> 8) & 0xff;
+  const b3 = lower23 & 0xff;
+  const macStr = `01:00:5e:${b1.toString(16).padStart(2, "0")}:${b2.toString(16).padStart(2, "0")}:${b3.toString(16).padStart(2, "0")}`;
+
+  return [
+    { key: "Multicast Scope", value: scope },
+    { key: "Corresponding Multicast MAC", value: macStr },
+  ];
+}
+
+function getIPv4ScopeProperty(
+  addr: number,
+  firstOctet: number,
+): PropertyItem | null {
+  const octet2 = (addr >>> 16) & 0xff;
+  const isPrivate =
+    firstOctet === 10 ||
+    (firstOctet === 172 && (octet2 & 0xf0) === 16) ||
+    (firstOctet === 192 && octet2 === 168);
+
+  if (isPrivate) {
+    return { key: "Scope", value: "Private" };
+  }
+  if (firstOctet === 127) {
+    return { key: "Scope", value: "Loopback" };
+  }
+  if (firstOctet === 169 && octet2 === 254) {
+    return { key: "Scope", value: "Link-Local" };
+  }
+  if (firstOctet === 100 && (octet2 & 0xc0) === 64) {
+    return { key: "Scope", value: "Shared Address Space (CGNAT)" };
+  }
+  return null;
+}
+
+interface HostRangeResult {
+  maxHosts: string;
+  hostRange: { first: string; last: string } | null;
+}
+
+function calculateIPv4HostRange(
+  network: number,
+  broadcastNum: number,
+  prefix: number,
+  isMulticast: boolean,
+  ipStr: string,
+  netStr: string,
+  hostBits: number,
+): HostRangeResult {
+  if (isMulticast) {
+    return { maxHosts: "0", hostRange: null };
+  }
+  if (prefix === 32) {
+    return { maxHosts: "1", hostRange: { first: ipStr, last: ipStr } };
+  }
+  if (prefix === 31) {
+    return {
+      maxHosts: "2",
+      hostRange: { first: netStr, last: uint32ToIPv4((network + 1) >>> 0) },
+    };
+  }
+  const hostsNum = 2 ** hostBits - 2;
+  return {
+    maxHosts: hostsNum.toString(),
+    hostRange: {
+      first: uint32ToIPv4((network + 1) >>> 0),
+      last: uint32ToIPv4((broadcastNum - 1) >>> 0),
+    },
+  };
+}
+
 export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
   const addr = parseIPv4ToUint32(ipStr);
   if (addr === null) {
@@ -107,126 +277,39 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
   const firstOctet = (addr >>> 24) & 0xff;
   const isMulticast = firstOctet >= 224 && firstOctet <= 239;
 
-  let role: AddressRole = "host";
-  const properties: PropertyItem[] = [];
+  const { role, property: roleProp } = determineIPv4Role(
+    addr,
+    network,
+    broadcastNum,
+    prefix,
+    isMulticast,
+    ipStr,
+    netStr,
+  );
+
+  const properties: PropertyItem[] = [
+    roleProp,
+    getIPv4ClassProperty(firstOctet),
+  ];
 
   if (isMulticast) {
-    role = "multicast";
-    properties.push({ key: "Role", value: `${ipStr} is a MULTICAST address` });
-  } else if (prefix === 31) {
-    role = "host";
-    properties.push({
-      key: "Role",
-      value: `${ipStr} is a HOST interface in ${netStr}/31 (RFC 3021 Point-to-Point)`,
-    });
-  } else if (prefix === 32) {
-    role = "host";
-    properties.push({
-      key: "Role",
-      value: `${ipStr} is a HOST address in ${ipStr}/32`,
-    });
-  } else {
-    if (addr === network) {
-      role = "network";
-      properties.push({ key: "Role", value: `${ipStr} is a NETWORK address` });
-    } else if (addr === broadcastNum) {
-      role = "broadcast";
-      properties.push({
-        key: "Role",
-        value: `${ipStr} is the BROADCAST address of ${netStr}/${prefix}`,
-      });
-    } else {
-      role = "host";
-      properties.push({
-        key: "Role",
-        value: `${ipStr} is a HOST address in ${netStr}/${prefix}`,
-      });
-    }
+    properties.push(...getIPv4MulticastProperties(addr, firstOctet));
   }
 
-  // Class Identification
-  if (firstOctet <= 127) {
-    properties.push({ key: "Class", value: "Class A" });
-  } else if (firstOctet <= 191) {
-    properties.push({ key: "Class", value: "Class B" });
-  } else if (firstOctet <= 223) {
-    properties.push({ key: "Class", value: "Class C" });
-  } else if (firstOctet <= 239) {
-    properties.push({ key: "Class", value: "Class D (Multicast)" });
-  } else if (firstOctet <= 255) {
-    properties.push({ key: "Class", value: "Class E" });
-  } else {
-    properties.push({
-      key: "Class",
-      value: "Invalid (not in class A, B, C or D)",
-    });
+  const scopeProp = getIPv4ScopeProperty(addr, firstOctet);
+  if (scopeProp) {
+    properties.push(scopeProp);
   }
 
-  // Special Class D multicast details
-  if (isMulticast) {
-    let scope = "global";
-    if (
-      firstOctet === 224 &&
-      ((addr >>> 16) & 0xff) === 0 &&
-      ((addr >>> 8) & 0xff) === 0
-    ) {
-      scope = "link-local";
-    } else if (
-      firstOctet === 224 &&
-      ((addr >>> 16) & 0xff) === 0 &&
-      ((addr >>> 8) & 0xff) === 1
-    ) {
-      scope = "internetwork control";
-    } else if (firstOctet === 239) {
-      scope = "administratively scoped";
-    }
-    properties.push({ key: "Multicast Scope", value: scope });
-
-    // Multicast MAC: 01:00:5e:00:00:00 + lower 23 bits
-    const lower23 = addr & 0x7fffff;
-    const b1 = (lower23 >>> 16) & 0x7f;
-    const b2 = (lower23 >>> 8) & 0xff;
-    const b3 = lower23 & 0xff;
-    const macStr = `01:00:5e:${b1.toString(16).padStart(2, "0")}:${b2.toString(16).padStart(2, "0")}:${b3.toString(16).padStart(2, "0")}`;
-    properties.push({ key: "Corresponding Multicast MAC", value: macStr });
-  }
-
-  // RFC Properties
-  // Private (RFC 1918): 10.0.0.0/8, 172.16.0.0/12, 192.168.0.0/16
-  if (
-    firstOctet === 10 ||
-    (firstOctet === 172 && ((addr >>> 16) & 0xf0) === 16) ||
-    (firstOctet === 192 && ((addr >>> 16) & 0xff) === 168)
-  ) {
-    properties.push({ key: "Scope", value: "Private" });
-  } else if (firstOctet === 127) {
-    properties.push({ key: "Scope", value: "Loopback" });
-  } else if (firstOctet === 169 && ((addr >>> 16) & 0xff) === 254) {
-    properties.push({ key: "Scope", value: "Link-Local" });
-  } else if (firstOctet === 100 && ((addr >>> 16) & 0xc0) === 64) {
-    properties.push({ key: "Scope", value: "Shared Address Space (CGNAT)" });
-  }
-
-  // Host Calculation
-  let maxHosts = "0";
-  let hostRange: { first: string; last: string } | null = null;
-
-  if (!isMulticast) {
-    if (prefix === 32) {
-      maxHosts = "1";
-      hostRange = { first: ipStr, last: ipStr };
-    } else if (prefix === 31) {
-      maxHosts = "2";
-      hostRange = { first: netStr, last: uint32ToIPv4(network + 1) };
-    } else {
-      const hostsNum = 2 ** hostBits - 2;
-      maxHosts = hostsNum.toString();
-      hostRange = {
-        first: uint32ToIPv4(network + 1),
-        last: uint32ToIPv4(broadcastNum - 1),
-      };
-    }
-  }
+  const { maxHosts, hostRange } = calculateIPv4HostRange(
+    network,
+    broadcastNum,
+    prefix,
+    isMulticast,
+    ipStr,
+    netStr,
+    hostBits,
+  );
 
   const cloudProfiles = calculateCloudProfiles(network, prefix);
 
