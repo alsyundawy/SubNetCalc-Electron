@@ -1,4 +1,4 @@
-<!-- markdownlint-disable-file MD033 MD041 -->
+<!-- markdownlint-disable-file MD013 MD033 MD041 -->
 
 <p align="center">
   <a href="https://github.com/alsyundawy/SubNetCalc-Electron">
