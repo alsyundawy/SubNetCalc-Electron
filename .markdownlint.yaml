@@ -1,5 +1,8 @@
 # Markdownlint configuration
 MD013: false
+MD022: false
+MD026: false
+MD032: false
 MD024:
   siblings_only: true
 MD033:

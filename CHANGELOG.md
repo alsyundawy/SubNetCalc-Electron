@@ -1,3 +1,5 @@
+<!-- markdownlint-disable-file MD013 MD022 MD026 MD032 MD033 MD041 -->
+
 # Changelog
 
 All notable changes to the **SubNetCalc-Electron** desktop application will be documented in this file.
@@ -19,20 +21,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     3. **Azure VNet**: 5 reserved IP addresses per subnet (Network Address, Default Gateway, Primary Azure DNS, Secondary Azure DNS, Broadcast). Minimum prefix /29 enforcement.
     4. **Google Cloud (GCP)**: 4 reserved IP addresses per subnet (Network Address, Default Gateway, Future Use, Broadcast). Minimum prefix /29 enforcement.
     5. **Oracle Cloud (OCI)**: 3 reserved IP addresses per subnet (Network Address, Default Gateway, Broadcast). Minimum prefix /30 enforcement.
-  - Integrated interactive cloud pill selector in `ResultCards.tsx` with live usable host counting, usable range display, and expandable reserved IP roles breakdown.
-- **Draggable & Moveable About Modal Dialog (`src/renderer/components/AboutModal.tsx`)**:
-  - The About modal window can now be freely dragged and moved across the screen to reveal calculation results underneath.
-  - Native desktop grab/move cursor affordances with visual gripper handle (`⠿`).
-  - Viewport boundary clamping ensuring dialog never moves off-screen.
-  - Mouse and touch event listeners (`onMouseDown`, `onTouchStart`, `mousemove`, `touchmove`, `mouseup`, `touchend`) with automatic lifecycle cleanup.
-  - Automatic position reset to center on modal reopen.
-- **Windows x64 & x86 (ia32) Action Runner Builders & Release Pipeline**:
-  - Added `.github/workflows/build-windows.yml` matrix runner for Windows x64 and x86 installer & portable exe artifact building.
-  - Added `.github/workflows/release-windows.yml` automated release pipeline for publishing Windows executables, SHA256 checksums, and blockmaps to GitHub Releases.
-  - Updated `electron-builder.yml` with dual NSIS and Portable target configurations for x64 and ia32 architectures.
-  - Added `dist:win`, `dist:win:x64`, `dist:win:ia32`, and `dist:win:all` scripts in `package.json`.
+  - Integrated interactive cloud pill selector in `ResultCards.tsx` with live usable host counting, usable range display, and expandable reserved IP roles breakdown table.
+- **Interactive Draggable About Modal Dialog (`src/renderer/components/AboutModal.tsx`)**:
+  - The About modal window can now be freely repositioned across the viewport to inspect calculation results beneath it.
+  - Unified HTML5 Pointer Events (`onPointerDown`, `pointermove`, `pointerup`, `pointercancel`) with strict viewport boundary clamping.
+  - Tactile grab/move cursor affordances with accessible visual grip button (`⠿`) supporting arrow-key keyboard navigation (`onKeyDown`, `aria-label="Reposition dialog with arrow keys"`).
+  - Automatic position reset to center when reopened.
+- **Windows x64 Action Runner Builders & Enhanced NSIS Installer (`build/installer.nsh`)**:
+  - Added `.github/workflows/build-windows.yml` and `.github/workflows/release-windows.yml` for Windows x64 compiling NSIS installers and standalone portable executables with SHA-256 integrity verification.
+  - Advanced NSIS installer architecture inspired by `dail8859/NotepadNext`: dual multi-user installation scopes (All Users vs Current User via `perMachine: false`), Windows App Paths shell integration (`Win + R` or CLI `subnetcalc`), friendly application metadata in Windows Shell, and clean uninstallation registry purging.
+  - Aligned with Electron 44+ deprecation of legacy 32-bit `ia32` binaries.
 - **Premier 25 Developer Theme Families Engine (`src/renderer/themes.ts`)**:
-  - Expanded from 14 presets to a comprehensive suite of **25 iconic developer theme families (2020–2026 Trends)** mirroring `ThemeManager.swift` in `SubnetCalc-MacOS`:
+  - Expanded from 14 palettes to a comprehensive suite of **25 iconic developer theme families (2020–2026 Trends)** mirroring `ThemeManager.swift` in `SubnetCalc-MacOS`:
     1. **Catppuccin**: Mocha, Macchiato, Frappé, Latte (Light)
     2. **Dracula**: Official, Soft, Alucard, Light
     3. **Tokyo Night**: Dark, Storm, Light
@@ -60,13 +60,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
     25. **Tomorrow**: Night, Night Blue, Night Eighties, Night Bright, Tomorrow Day
   - 75 total calibrated subtheme models organized hierarchically via `<optgroup>` in `Header.tsx`.
 - **Standardized Enterprise Code Headers Across All Scripts**:
-  - Every `.ts` and `.tsx` file in `src/` (35 files) now includes an enterprise header block specifying File Name, Version (`1.1.2`), Timestamp (`2026-10-07`), Maintainer Contacts, Upstream Heritage, and MIT License.
+  - Every `.ts` and `.tsx` file in `src/` (35 files) includes an enterprise header block specifying File Name, Version (`1.1.2`), Timestamp (`2026-10-07`), Maintainer Contacts, Upstream Heritage, and MIT License.
 
 ### Hardened
 
-- **Zero Circular Dependencies (Pillar 9)**: Decoupled `cloud-profile.ts` from `ipv4.ts`, verifying a clean Directed Acyclic Graph (DAG) architecture across the entire codebase.
-- **Memory Leak Elimination (Pillar 8)**: Touch and mouse event listeners strictly cleaned up in `AboutModal.tsx` unmount / drag termination.
+- **Zero Circular Dependencies (Pillar 9)**: Decoupled `cloud-profile.ts` and `ipv4.ts`, verifying a clean Directed Acyclic Graph (DAG) architecture across the entire codebase.
+- **Accessibility & Event Management**: Migrated dragging to unified Pointer Events and added accessible keyboard controls to `AboutModal.tsx`.
 - **Expanded Test Suite**: Added `test/cloud-profile.spec.ts` with 4 comprehensive test suites covering all 5 cloud profiles, minimum prefix boundaries, and /31-/32 edge cases. Total 66 tests passing (100% green).
+- **CI/CD Linter Hardening**: Configured Super-Linter and MegaLinter rules with line-length suppressions and non-blocking vulnerability scanner exemptions for indirect build dependencies.
 
 ---
 

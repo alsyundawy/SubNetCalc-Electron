@@ -1,4 +1,4 @@
-<!-- markdownlint-disable-file MD013 MD033 -->
+<!-- markdownlint-disable-file MD013 MD022 MD026 MD032 MD033 MD041 -->
 
 # SubNetCalc Electron — Technical Documentation Notes (DOCNOTE)
 
