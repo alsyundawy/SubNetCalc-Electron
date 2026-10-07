@@ -1,6 +1,52 @@
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/renderer/components/Header.tsx
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/renderer/components/Header.tsx
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
 import React from "react";
 import appIcon from "../assets/icon.png";
-import { THEMES } from "../themes.js";
+import { THEMES, THEME_GROUPS } from "../themes.js";
 
 interface HeaderProps {
   version: string;
@@ -8,14 +54,6 @@ interface HeaderProps {
   onSelectTheme: (themeId: string) => void;
   onOpenAbout: () => void;
 }
-
-const THEME_GROUPS = [
-  "Catppuccin",
-  "Dracula",
-  "Gruvbox",
-  "Solarized",
-  "Tomorrow",
-] as const;
 
 export const Header: React.FC<HeaderProps> = ({
   version,
@@ -34,7 +72,7 @@ export const Header: React.FC<HeaderProps> = ({
         <div>
           <div className="brand-title">
             SubNetCalc Electron{" "}
-            <span className="brand-badge">v{version || "1.1.1"}</span>
+            <span className="brand-badge">v{version || "1.1.2"}</span>
           </div>
           <div className="brand-subtitle">
             High-Precision IPv4 &amp; IPv6 Subnet Calculator Desktop Suite
@@ -43,7 +81,7 @@ export const Header: React.FC<HeaderProps> = ({
       </div>
 
       <div className="header-actions">
-        {/* Modern Multi-Theme Selector */}
+        {/* Premier 25 Developer Theme Families Selector */}
         <div className="theme-picker-wrapper">
           <span
             className="theme-picker-icon"
@@ -57,17 +95,21 @@ export const Header: React.FC<HeaderProps> = ({
             value={currentThemeId}
             onChange={(e) => onSelectTheme(e.target.value)}
             aria-label="Select Color Theme"
-            title="Switch Theme Palette"
+            title="Switch Theme Palette (25 Developer Families)"
           >
-            {THEME_GROUPS.map((group) => (
-              <optgroup key={group} label={group}>
-                {THEMES.filter((t) => t.group === group).map((t) => (
-                  <option key={t.id} value={t.id}>
-                    {t.name} ({t.isDark ? "Dark" : "Light"})
-                  </option>
-                ))}
-              </optgroup>
-            ))}
+            {THEME_GROUPS.map((group) => {
+              const groupThemes = THEMES.filter((t) => t.group === group);
+              if (groupThemes.length === 0) return null;
+              return (
+                <optgroup key={group} label={group}>
+                  {groupThemes.map((t) => (
+                    <option key={t.id} value={t.id}>
+                      {t.name} ({t.isDark ? "Dark" : "Light"})
+                    </option>
+                  ))}
+                </optgroup>
+              );
+            })}
           </select>
         </div>
 

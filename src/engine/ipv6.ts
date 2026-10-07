@@ -1,3 +1,26 @@
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/engine/ipv6.ts
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
 import { CalculateResult, PropertyItem, AddressRole } from "./types.js";
 import { parseIPv6ToBigInt } from "./parse.js";
 import { formatReverseDnsZone } from "./format.js";
@@ -133,19 +156,28 @@ function determineIPv6Role(
   if (addr === 0n && prefix === 128) {
     return {
       role: "unspecified",
-      roleProperty: { key: "Role", value: `${addrCanon} is the UNSPECIFIED address` },
+      roleProperty: {
+        key: "Role",
+        value: `${addrCanon} is the UNSPECIFIED address`,
+      },
     };
   }
   if (addr >> 120n === 0xffn) {
     return {
       role: "multicast",
-      roleProperty: { key: "Role", value: `${addrCanon} is a MULTICAST address` },
+      roleProperty: {
+        key: "Role",
+        value: `${addrCanon} is a MULTICAST address`,
+      },
     };
   }
   if (prefix === 128) {
     return {
       role: "host",
-      roleProperty: { key: "Role", value: `${addrCanon} is a HOST address in ${addrCanon}/128` },
+      roleProperty: {
+        key: "Role",
+        value: `${addrCanon} is a HOST address in ${addrCanon}/128`,
+      },
     };
   }
   if (addr === network) {
@@ -156,7 +188,10 @@ function determineIPv6Role(
   }
   return {
     role: "host",
-    roleProperty: { key: "Role", value: `${addrCanon} is a HOST address in ${netCanon}/${prefix}` },
+    roleProperty: {
+      key: "Role",
+      value: `${addrCanon} is a HOST address in ${netCanon}/${prefix}`,
+    },
   };
 }
 
@@ -208,9 +243,18 @@ function identifyIPv6ScopeProperties(addr: bigint): PropertyItem[] {
     const subnetId = (addr >> 64n) & 0xffffn;
     return [
       { key: "Scope", value: "Unique Local Unicast (RFC 4193)" },
-      { key: "ULA Type", value: isLocal ? "Locally Assigned (L=1)" : "IETF Reserved (L=0)" },
-      { key: "ULA Global ID", value: `0x${globalId.toString(16).padStart(10, "0")}` },
-      { key: "ULA Subnet ID", value: `0x${subnetId.toString(16).padStart(4, "0")}` },
+      {
+        key: "ULA Type",
+        value: isLocal ? "Locally Assigned (L=1)" : "IETF Reserved (L=0)",
+      },
+      {
+        key: "ULA Global ID",
+        value: `0x${globalId.toString(16).padStart(10, "0")}`,
+      },
+      {
+        key: "ULA Subnet ID",
+        value: `0x${subnetId.toString(16).padStart(4, "0")}`,
+      },
     ];
   }
   if (firstHextet === 0x2002) {
@@ -230,11 +274,22 @@ function identifyIPv6ScopeProperties(addr: bigint): PropertyItem[] {
   return [];
 }
 
-function getGlobalUnicastProperties(addr: bigint, interfaceId: bigint): PropertyItem[] {
-  const h4 = Number((interfaceId >> 48n) & 0xffffn).toString(16).padStart(4, "0");
-  const h5 = Number((interfaceId >> 32n) & 0xffffn).toString(16).padStart(4, "0");
-  const h6 = Number((interfaceId >> 16n) & 0xffffn).toString(16).padStart(4, "0");
-  const h7 = Number(interfaceId & 0xffffn).toString(16).padStart(4, "0");
+function getGlobalUnicastProperties(
+  addr: bigint,
+  interfaceId: bigint,
+): PropertyItem[] {
+  const h4 = Number((interfaceId >> 48n) & 0xffffn)
+    .toString(16)
+    .padStart(4, "0");
+  const h5 = Number((interfaceId >> 32n) & 0xffffn)
+    .toString(16)
+    .padStart(4, "0");
+  const h6 = Number((interfaceId >> 16n) & 0xffffn)
+    .toString(16)
+    .padStart(4, "0");
+  const h7 = Number(interfaceId & 0xffffn)
+    .toString(16)
+    .padStart(4, "0");
   const iidStr = `${h4}:${h5}:${h6}:${h7}`;
 
   const low24 = Number(addr & 0xffffffn);

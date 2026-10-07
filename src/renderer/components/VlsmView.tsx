@@ -1,3 +1,26 @@
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/renderer/components/VlsmView.tsx
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
 import React, { useState, useId, useMemo } from "react";
 import {
   calculateVLSM,
@@ -212,13 +235,17 @@ export const VlsmView: React.FC = () => {
               value={Math.min(result.utilizationPercent, 100)}
               max={100}
               aria-label="Address pool allocation progress"
-              style={{ accentColor: getUtilizationColor(result.utilizationPercent) }}
+              style={{
+                accentColor: getUtilizationColor(result.utilizationPercent),
+              }}
             >
               <div
                 className="capacity-progress-fill"
                 style={{
                   width: `${Math.min(result.utilizationPercent, 100)}%`,
-                  backgroundColor: getUtilizationColor(result.utilizationPercent),
+                  backgroundColor: getUtilizationColor(
+                    result.utilizationPercent,
+                  ),
                 }}
               />
             </progress>
@@ -280,9 +307,7 @@ export const VlsmView: React.FC = () => {
                         min="1"
                         className="input-number table-inline"
                         value={alloc.hostsNeeded}
-                        onChange={(e) =>
-                          handleUpdateHosts(idx, e.target.value)
-                        }
+                        onChange={(e) => handleUpdateHosts(idx, e.target.value)}
                         aria-label={`Required hosts for ${alloc.name}`}
                       />
                     </td>

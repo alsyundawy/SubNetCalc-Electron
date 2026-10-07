@@ -573,6 +573,139 @@ body {
   color: var(--text-dim);
 }
 
+/* Cloud Reservation Profiles Styling (Heritage from SubnetCalc-MacOS) */
+.cloud-profiles-card {
+  padding: 8px 12px;
+  gap: 6px;
+  background: var(--bg-card);
+}
+
+.cloud-profiles-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.cloud-pills-row {
+  display: flex;
+  gap: 4px;
+  flex-wrap: wrap;
+}
+
+.btn-cloud-pill {
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xs);
+  padding: 2px 7px;
+  font-size: 10px;
+  font-weight: 500;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.btn-cloud-pill:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--text-main);
+  border-color: var(--accent-cyan);
+}
+
+.btn-cloud-pill.active {
+  background: var(--accent-cyan);
+  color: #000;
+  border-color: var(--accent-cyan);
+  font-weight: 700;
+}
+
+.cloud-active-details {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: rgba(0, 0, 0, 0.15);
+  padding: 6px 8px;
+  border-radius: var(--radius-xs);
+  border: 1px solid var(--border-color);
+}
+
+.cloud-stats-grid {
+  display: flex;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.cloud-stat-item {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  font-size: 11px;
+}
+
+.cloud-stat-label {
+  color: var(--text-dim);
+  font-size: 10px;
+  text-transform: uppercase;
+}
+
+.cloud-stat-value {
+  font-weight: 600;
+  color: var(--text-main);
+}
+
+.cloud-stat-value.prohibited {
+  color: var(--accent-red);
+}
+
+.cloud-roles-accordion {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.btn-toggle-roles {
+  background: transparent;
+  border: none;
+  color: var(--accent-cyan);
+  font-size: 10px;
+  cursor: pointer;
+  text-align: left;
+  padding: 0;
+  font-weight: 600;
+}
+
+.btn-toggle-roles:hover {
+  text-decoration: underline;
+}
+
+.cloud-roles-list {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 4px;
+  margin-top: 2px;
+}
+
+.cloud-role-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  background: rgba(255, 255, 255, 0.03);
+  padding: 2px 6px;
+  border-radius: 3px;
+}
+
+.cloud-role-ip {
+  color: var(--accent-cyan);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+.cloud-role-name {
+  color: var(--text-secondary);
+}
+
 /* Bit visualizer */
 .bit-section {
   background: var(--bg-card);
@@ -902,6 +1035,41 @@ dialog.modal-overlay::backdrop {
   display: flex;
   justify-content: space-between;
   align-items: center;
+}
+
+.modal-header.draggable-header {
+  cursor: grab;
+  user-select: none;
+  touch-action: none;
+}
+
+.modal-header.draggable-header:active {
+  cursor: grabbing;
+}
+
+.modal-content.is-dragging {
+  user-select: none;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.45);
+}
+
+.about-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.drag-indicator-handle {
+  font-size: 16px;
+  color: var(--text-dim);
+  cursor: grab;
+  opacity: 0.6;
+  transition: opacity 0.15s ease;
+  user-select: none;
+}
+
+.drag-indicator-handle:hover {
+  opacity: 1;
+  color: var(--accent-cyan);
 }
 
 .about-header-branding {

@@ -7,6 +7,69 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.2] - 2026-10-07
+
+### Added
+
+- **Multi-Cloud Subnet Reservation Profiles (`src/engine/cloud-profile.ts`)**:
+  - Full architectural parity with `SubnetCalc-MacOS` (`IPSubnetcalc.swift`).
+  - Implemented 5 cloud reservation profiles:
+    1. **Standard (RFC 1918)**: 2 reserved addresses (Network ID & Broadcast), RFC 3021 /31 PtP support (0 reserved, 2 usable), /32 single host support.
+    2. **AWS VPC**: 5 reserved IP addresses per subnet (Network Address, VPC Router / Default Gateway, Amazon-Provided DNS, Future Use, Broadcast). Minimum prefix /28 enforcement.
+    3. **Azure VNet**: 5 reserved IP addresses per subnet (Network Address, Default Gateway, Primary Azure DNS, Secondary Azure DNS, Broadcast). Minimum prefix /29 enforcement.
+    4. **Google Cloud (GCP)**: 4 reserved IP addresses per subnet (Network Address, Default Gateway, Future Use, Broadcast). Minimum prefix /29 enforcement.
+    5. **Oracle Cloud (OCI)**: 3 reserved IP addresses per subnet (Network Address, Default Gateway, Broadcast). Minimum prefix /30 enforcement.
+  - Integrated interactive cloud pill selector in `ResultCards.tsx` with live usable host counting, usable range display, and expandable reserved IP roles breakdown.
+- **Draggable & Moveable About Modal Dialog (`src/renderer/components/AboutModal.tsx`)**:
+  - The About modal window can now be freely dragged and moved across the screen to reveal calculation results underneath.
+  - Native desktop grab/move cursor affordances with visual gripper handle (`⠿`).
+  - Viewport boundary clamping ensuring dialog never moves off-screen.
+  - Mouse and touch event listeners (`onMouseDown`, `onTouchStart`, `mousemove`, `touchmove`, `mouseup`, `touchend`) with automatic lifecycle cleanup.
+  - Automatic position reset to center on modal reopen.
+- **Windows x64 & x86 (ia32) Action Runner Builders & Release Pipeline**:
+  - Added `.github/workflows/build-windows.yml` matrix runner for Windows x64 and x86 installer & portable exe artifact building.
+  - Added `.github/workflows/release-windows.yml` automated release pipeline for publishing Windows executables, SHA256 checksums, and blockmaps to GitHub Releases.
+  - Updated `electron-builder.yml` with dual NSIS and Portable target configurations for x64 and ia32 architectures.
+  - Added `dist:win`, `dist:win:x64`, `dist:win:ia32`, and `dist:win:all` scripts in `package.json`.
+- **Premier 25 Developer Theme Families Engine (`src/renderer/themes.ts`)**:
+  - Expanded from 14 presets to a comprehensive suite of **25 iconic developer theme families (2020–2026 Trends)** mirroring `ThemeManager.swift` in `SubnetCalc-MacOS`:
+    1. **Catppuccin**: Mocha, Macchiato, Frappé, Latte (Light)
+    2. **Dracula**: Official, Soft, Alucard, Light
+    3. **Tokyo Night**: Dark, Storm, Light
+    4. **Nord**: Dark, Polar, Light
+    5. **One Dark**: One Dark Pro, One Dark Vivid, One Light
+    6. **Gruvbox**: Dark Hard, Dark Medium, Light
+    7. **Solarized**: Dark & Light precision palettes
+    8. **GitHub**: Dark, Dark Dimmed, Light, High Contrast (WCAG AAA)
+    9. **Monokai**: Classic, Pro, Charcoal, Light
+    10. **Rosé Pine**: Main, Moon, Dawn (Light)
+    11. **Ayu**: Dark, Mirage, Light
+    12. **Kanagawa**: Wave, Dragon, Lotus (Light)
+    13. **Everforest**: Dark Hard, Dark Medium, Light
+    14. **Night Owl**: Dark & Light Owl
+    15. **Material**: Palenight, Deep Ocean, Lighter
+    16. **SynthWave '84**: Glow & Classic
+    17. **Cyberpunk**: Cyberpunk 2077 & Scarlet
+    18. **Shades of Purple**: Super Dark, Classic, Light
+    19. **Poimandres**: Dark, Storm, Light (White)
+    20. **Horizon**: Dark & Bright (Light)
+    21. **Andromeda**: Dark, Bordered, Light
+    22. **Nightfox**: Dark, Duskfox, Dawnfox (Light)
+    23. **Cobalt2**: Classic, Bright, Light
+    24. **Alabaster**: Dark & Light
+    25. **Tomorrow**: Night, Night Blue, Night Eighties, Night Bright, Tomorrow Day
+  - 75 total calibrated subtheme models organized hierarchically via `<optgroup>` in `Header.tsx`.
+- **Standardized Enterprise Code Headers Across All Scripts**:
+  - Every `.ts` and `.tsx` file in `src/` (35 files) now includes an enterprise header block specifying File Name, Version (`1.1.2`), Timestamp (`2026-10-07`), Maintainer Contacts, Upstream Heritage, and MIT License.
+
+### Hardened
+
+- **Zero Circular Dependencies (Pillar 9)**: Decoupled `cloud-profile.ts` from `ipv4.ts`, verifying a clean Directed Acyclic Graph (DAG) architecture across the entire codebase.
+- **Memory Leak Elimination (Pillar 8)**: Touch and mouse event listeners strictly cleaned up in `AboutModal.tsx` unmount / drag termination.
+- **Expanded Test Suite**: Added `test/cloud-profile.spec.ts` with 4 comprehensive test suites covering all 5 cloud profiles, minimum prefix boundaries, and /31-/32 edge cases. Total 66 tests passing (100% green).
+
+---
+
 ## [1.1.1] - 2026-10-06
 
 ### Rebranded

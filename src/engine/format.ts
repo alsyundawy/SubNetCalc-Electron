@@ -1,3 +1,26 @@
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/engine/format.ts
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
 import { CalculateResult } from "./types.js";
 import { parseIPv6ToBigInt } from "./parse.js";
 
@@ -38,7 +61,9 @@ function formatMaxHostsAndRange(res: CalculateResult): string[] {
   const formula = formatFormula(res);
   const lines: string[] = [`Max. Hosts     = ${res.maxHosts}   ${formula}`];
   if (res.hostRange) {
-    lines.push(`Host Range     = { ${res.hostRange.first} - ${res.hostRange.last} }`);
+    lines.push(
+      `Host Range     = { ${res.hostRange.first} - ${res.hostRange.last} }`,
+    );
   }
   return lines;
 }
@@ -58,7 +83,10 @@ function formatPropertyLine(
   ) {
     const label = getGlobalUnicastPropLabel(prop.key);
     if (!lines.includes("   - Global Unicast Properties:")) {
-      lines.push("   - Global Unicast Properties:", `      + ${label} = ${prop.value}`);
+      lines.push(
+        "   - Global Unicast Properties:",
+        `      + ${label} = ${prop.value}`,
+      );
     } else {
       lines.push(`      + ${label} = ${prop.value}`);
     }
@@ -105,7 +133,9 @@ export function formatResultPlainText(res: CalculateResult): string {
     "Properties     = ",
     ...propLines,
     ...(res.dns?.hostname ? [`DNS Hostname   = ${res.dns.hostname}`] : []),
-    ...(res.geo?.country ? [`GeoIP Country  = ${res.geo.country} (${res.geo.code})`] : []),
+    ...(res.geo?.country
+      ? [`GeoIP Country  = ${res.geo.country} (${res.geo.code})`]
+      : []),
   ];
 
   return allLines.join("\n");

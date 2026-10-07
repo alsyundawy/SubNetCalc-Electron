@@ -1,0 +1,111 @@
+name: Build SubNetCalc Windows
+
+on:
+  push:
+    branches:
+      - main
+      - master
+    tags:
+      - "*"
+      - "**"
+  pull_request:
+    branches:
+      - main
+      - master
+  # checkov:skip=CKV_GHA_7: Allow manual workflow_dispatch inputs for flexible builds
+  workflow_dispatch:
+    inputs:
+      ref:
+        description: "Branch, tag, atau commit SHA yang ingin di-build (contoh: main, v1.1.2)"
+        required: false
+        default: main
+        type: string
+
+permissions:
+  contents: read
+
+env:
+  NODE_VERSION: 22.x
+
+jobs:
+  build-windows:
+    name: Build Windows (${{ matrix.arch_label }})
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ─── Windows x64 (64-bit) ──────────────────────────────────
+          - arch: x64
+            arch_label: Windows x64 (64-bit)
+            build_script: dist:win:x64
+
+          # ─── Windows x86 (32-bit / ia32) ───────────────────────────
+          - arch: ia32
+            arch_label: Windows x86 (32-bit)
+            build_script: dist:win:ia32
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.ref != '' && inputs.ref || github.ref }}
+          persist-credentials: false
+
+      - name: Inspect Runner Environment
+        shell: bash
+        env:
+          TARGET_ARCH: ${{ matrix.arch }}
+          TARGET_REF: ${{ inputs.ref || github.ref }}
+        run: |
+          echo "=========================================="
+          echo "Runner Name : $RUNNER_NAME"
+          echo "Runner OS   : $RUNNER_OS"
+          echo "Target Arch : $TARGET_ARCH"
+          echo "Event Name  : $GITHUB_EVENT_NAME"
+          echo "Trigger Ref : $GITHUB_REF"
+          echo "Target Ref  : $TARGET_REF"
+          echo "=========================================="
+
+      - name: Setup NodeJS for Windows
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Dependencies
+        shell: bash
+        run: npm ci
+
+      - name: Run Quality Verification & Tests
+        shell: bash
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+
+      - name: Build Windows Executables (${{ matrix.arch_label }})
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_SCRIPT: ${{ matrix.build_script }}
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          echo "Building SubNetCalc for Windows $TARGET_ARCH using '$BUILD_SCRIPT'..."
+          npm run "$BUILD_SCRIPT"
+
+      - name: Verify Output Files
+        shell: bash
+        run: |
+          echo "=== Content of release/ directory ==="
+          ls -lh release/
+
+      - name: Upload Windows Artifacts (${{ matrix.arch }})
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: subnetcalc-windows-${{ matrix.arch }}
+          path: |
+            release/*.exe
+            release/*.blockmap
+          if-no-files-found: error

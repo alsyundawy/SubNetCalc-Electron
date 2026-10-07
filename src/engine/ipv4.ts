@@ -1,6 +1,54 @@
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/engine/ipv4.ts
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/engine/ipv4.ts
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *   - SubnetCalc-MacOS Cloud Profiles Heritage (IPSubnetcalc.swift)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
 import { CalculateResult, PropertyItem, AddressRole } from "./types.js";
 import { parseIPv4ToUint32 } from "./parse.js";
 import { formatBitClassMap, formatReverseDnsZone } from "./format.js";
+import { calculateCloudProfiles } from "./cloud-profile.js";
 
 export function uint32ToIPv4(val: number): string {
   const octet1 = (val >>> 24) & 0xff;
@@ -180,6 +228,8 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
     }
   }
 
+  const cloudProfiles = calculateCloudProfiles(network, prefix);
+
   return {
     family: 4,
     address: uint32ToIPv4(addr),
@@ -198,5 +248,6 @@ export function calculateIPv4(ipStr: string, prefix: number): CalculateResult {
     warnings: [],
     bitClassMap: formatBitClassMap(addr, prefix),
     reverseDnsZone: formatReverseDnsZone(uint32ToIPv4(addr), 4),
+    cloudProfiles,
   };
 }

@@ -1,8 +1,8 @@
 {
   "name": "subnetcalc-electron",
   "productName": "SubNetCalc Electron",
-  "version": "1.1.1",
-  "description": "High-precision IPv4 & IPv6 Subnet Calculator Desktop Application with FLSM, VLSM, CIDR Summarization, and RFC Compliance",
+  "version": "1.1.2",
+  "description": "High-precision IPv4 & IPv6 Subnet Calculator Desktop Application with FLSM, VLSM, CIDR Summarization, Multi-Cloud VPC Profiles, and 25 Theme Families",
   "keywords": [
     "subnet",
     "subnet-calculator",
@@ -54,7 +54,11 @@
     "dist:mac:arm64": "npm run clean && npm run build && electron-builder --mac dmg:arm64 -p never",
     "dist:mac:all": "npm run clean && npm run build && electron-builder --mac --x64 -p never",
     "dist:mac:arm64:all": "npm run clean && npm run build && electron-builder --mac --arm64 -p never",
-    "dist:mac:universal": "npm run clean && npm run build && electron-builder --mac --universal -p never"
+    "dist:mac:universal": "npm run clean && npm run build && electron-builder --mac --universal -p never",
+    "dist:win": "npm run clean && npm run build && electron-builder --win -p never",
+    "dist:win:x64": "npm run clean && npm run build && electron-builder --win --x64 -p never",
+    "dist:win:ia32": "npm run clean && npm run build && electron-builder --win --ia32 -p never",
+    "dist:win:all": "npm run clean && npm run build && electron-builder --win --x64 --ia32 -p never"
   },
   "dependencies": {
     "maxmind": "^5.0.7",

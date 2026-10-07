@@ -1,0 +1,143 @@
+name: Release SubNetCalc Windows
+
+on:
+  push:
+    tags:
+      - v*
+  # checkov:skip=CKV_GHA_7: Allow manual workflow_dispatch inputs for flexible release tags
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag rilis yang ingin di-build (contoh: v1.1.2)"
+        required: true
+        default: v1.1.2
+        type: string
+
+permissions:
+  contents: write
+
+env:
+  NODE_VERSION: 22.x
+
+jobs:
+  build:
+    name: Build Windows Release (${{ matrix.arch_label }})
+    runs-on: windows-latest
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          # ─── Windows x64 ───────────────────────────────────────────
+          - arch: x64
+            arch_label: Windows x64 (64-bit)
+            build_script: dist:win:x64
+
+          # ─── Windows x86 (ia32) ────────────────────────────────────
+          - arch: ia32
+            arch_label: Windows x86 (32-bit)
+            build_script: dist:win:ia32
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
+          persist-credentials: false
+
+      - name: Setup NodeJS for Windows
+        uses: actions/setup-node@v7.0.0
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+
+      - name: Install Dependencies
+        shell: bash
+        run: npm ci
+
+      - name: Run Quality Verification & Tests
+        shell: bash
+        run: |
+          npm run typecheck
+          npm run lint
+          npm test
+
+      - name: Build Windows Executables (${{ matrix.arch_label }})
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          BUILD_SCRIPT: ${{ matrix.build_script }}
+          TARGET_ARCH: ${{ matrix.arch }}
+        run: |
+          echo "Building SubNetCalc for Windows $TARGET_ARCH using '$BUILD_SCRIPT'..."
+          npm run "$BUILD_SCRIPT"
+
+      - name: Generate SHA-256 Checksums
+        shell: bash
+        run: |
+          cd release
+          for f in *.exe; do
+            if [ -f "$f" ]; then
+              sha256sum "$f" >> "SHA256SUMS-windows-${{ matrix.arch }}.txt"
+            fi
+          done
+          cat "SHA256SUMS-windows-${{ matrix.arch }}.txt" || true
+
+      - name: Upload Windows Artifacts (${{ matrix.arch }})
+        uses: actions/upload-artifact@v4.6.1
+        with:
+          name: subnetcalc-windows-${{ matrix.arch }}
+          path: |
+            release/*.exe
+            release/*.blockmap
+            release/SHA256SUMS-*.txt
+          if-no-files-found: error
+
+  publish:
+    name: Publish Windows Release Assets
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v7.0.1
+        with:
+          ref: ${{ inputs.tag != '' && inputs.tag || github.ref }}
+          persist-credentials: false
+
+      - name: Determine Release Tag
+        shell: bash
+        env:
+          INPUT_TAG: ${{ inputs.tag }}
+          REF_NAME: ${{ github.ref_name }}
+        run: |
+          if [ -n "$INPUT_TAG" ]; then
+            TAG="$INPUT_TAG"
+          else
+            TAG="$REF_NAME"
+          fi
+          echo "RELEASE_TAG=${TAG}" >> "$GITHUB_ENV"
+
+      - name: Download all artifacts
+        uses: actions/download-artifact@v8.0.1
+
+      - name: Upload Release Assets & Checksums
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          echo "=== Downloaded Artifact Directories ==="
+          ls -la
+
+          # Upload EXE and blockmap artifacts
+          for dir in subnetcalc-windows-*; do
+            echo "Processing artifact dir: ${dir}"
+            if [ -d "${dir}" ]; then
+              for file in "${dir}"/*.exe "${dir}"/*.blockmap "${dir}"/SHA256SUMS-*.txt; do
+                if [ -f "${file}" ]; then
+                  echo "Uploading ${file} -> Release ${RELEASE_TAG}..."
+                  gh release upload "${RELEASE_TAG}" "${file}" --clobber
+                fi
+              done
+            fi
+          done

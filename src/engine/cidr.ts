@@ -1,3 +1,26 @@
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/engine/cidr.ts
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
 import { parseSubnetInput, parseIPv4ToUint32 } from "./parse.js";
 import { prefixToMask32, uint32ToIPv4 } from "./ipv4.js";
 
@@ -46,7 +69,7 @@ function parseRouteBlocks(routes: string[]): RouteBlock[] {
 
     const mask = prefixToMask32(parsed.prefix);
     const startAddr = (ipNum & mask) >>> 0;
-    const size = 2 ** (32 - parsed.prefix) >>> 0;
+    const size = (2 ** (32 - parsed.prefix)) >>> 0;
     const endAddr = (startAddr + size - 1) >>> 0;
 
     parsedBlocks.push({
@@ -116,7 +139,7 @@ export function summarizeRoutes(routes: string[]): CIDRSummaryResult {
   const supernetNetNum = (minStart & supernetMaskNum) >>> 0;
   const supernetNetStr = uint32ToIPv4(supernetNetNum);
   const supernetMaskStr = uint32ToIPv4(supernetMaskNum);
-  const totalAddresses = 2 ** (32 - supernetPrefix) >>> 0;
+  const totalAddresses = (2 ** (32 - supernetPrefix)) >>> 0;
 
   // Check if contiguous: sort by startAddr, check if no gaps or overlaps
   const sorted = [...parsedBlocks].sort((a, b) => a.startAddr - b.startAddr);

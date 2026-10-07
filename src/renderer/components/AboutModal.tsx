@@ -1,4 +1,50 @@
-import React, { useEffect } from "react";
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/renderer/components/AboutModal.tsx
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
+/**
+ * ============================================================================
+ * SubNetCalc Electron Desktop - Production-Grade Subnet Suite
+ * ============================================================================
+ * File: src/renderer/components/AboutModal.tsx
+ * Version: 1.1.2
+ * Date & Time: 2026-10-07T11:00:00+07:00
+ *
+ * Maintainer & Lead Developer:
+ *   Harry Dertin Sutisna Alsyundawy (Alsyundawy IT Solution)
+ *   Email: alsyundawy@gmail.com
+ *   Website: https://alsyundawy.com
+ *   GitHub: https://github.com/alsyundawy
+ *
+ * Original Heritage & Algorithmic Attribution:
+ *   - Dr. Thomas Dreibholz (dreibh/subnetcalc - RFC Calculation Engine)
+ *   - Julien Mulot (mulot/SubnetCalc - Original macOS Subnet Calculator)
+ *
+ * License: MIT (SPDX: MIT)
+ * Architecture: Cross-Platform (macOS Apple Silicon & Intel, Windows x64 & x86, Linux)
+ * ============================================================================
+ */
+
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import appIcon from "../assets/icon.png";
 
 export type AboutModalProps = {
@@ -12,6 +58,28 @@ export function AboutModal({
   isOpen,
   onClose,
 }: Readonly<AboutModalProps>): React.JSX.Element | null {
+  // Draggable window state
+  const [position, setPosition] = useState<{ x: number; y: number }>({
+    x: 0,
+    y: 0,
+  });
+  const [isDragging, setIsDragging] = useState(false);
+  const dragRef = useRef<{
+    startX: number;
+    startY: number;
+    initX: number;
+    initY: number;
+  }>({ startX: 0, startY: 0, initX: 0, initY: 0 });
+
+  // Reset position when opened
+  useEffect(() => {
+    if (isOpen) {
+      setPosition({ x: 0, y: 0 });
+      setIsDragging(false);
+    }
+  }, [isOpen]);
+
+  // Handle ESC key to close
   useEffect(() => {
     if (!isOpen) return;
 
@@ -27,6 +95,112 @@ export function AboutModal({
     };
   }, [isOpen, onClose]);
 
+  // Window drag event listeners
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    const dx = e.clientX - dragRef.current.startX;
+    const dy = e.clientY - dragRef.current.startY;
+
+    // Viewport clamping
+    const maxOffsetW = Math.max(100, window.innerWidth / 2 - 80);
+    const maxOffsetH = Math.max(100, window.innerHeight / 2 - 80);
+
+    const clampedX = Math.max(
+      -maxOffsetW,
+      Math.min(maxOffsetW, dragRef.current.initX + dx),
+    );
+    const clampedY = Math.max(
+      -maxOffsetH,
+      Math.min(maxOffsetH, dragRef.current.initY + dy),
+    );
+
+    setPosition({ x: clampedX, y: clampedY });
+  }, []);
+
+  const handleMouseUp = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  const handleTouchMove = useCallback((e: TouchEvent) => {
+    const touch = e.touches[0];
+    if (!touch) return;
+    const dx = touch.clientX - dragRef.current.startX;
+    const dy = touch.clientY - dragRef.current.startY;
+
+    const maxOffsetW = Math.max(100, window.innerWidth / 2 - 80);
+    const maxOffsetH = Math.max(100, window.innerHeight / 2 - 80);
+
+    const clampedX = Math.max(
+      -maxOffsetW,
+      Math.min(maxOffsetW, dragRef.current.initX + dx),
+    );
+    const clampedY = Math.max(
+      -maxOffsetH,
+      Math.min(maxOffsetH, dragRef.current.initY + dy),
+    );
+
+    setPosition({ x: clampedX, y: clampedY });
+  }, []);
+
+  const handleTouchEnd = useCallback(() => {
+    setIsDragging(false);
+  }, []);
+
+  useEffect(() => {
+    if (isDragging) {
+      window.addEventListener("mousemove", handleMouseMove);
+      window.addEventListener("mouseup", handleMouseUp);
+      window.addEventListener("touchmove", handleTouchMove);
+      window.addEventListener("touchend", handleTouchEnd);
+    } else {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    }
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove);
+      window.removeEventListener("mouseup", handleMouseUp);
+      window.removeEventListener("touchmove", handleTouchMove);
+      window.removeEventListener("touchend", handleTouchEnd);
+    };
+  }, [
+    isDragging,
+    handleMouseMove,
+    handleMouseUp,
+    handleTouchMove,
+    handleTouchEnd,
+  ]);
+
+  const handleHeaderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only initiate drag if not clicking buttons or interactive links
+    const target = e.target as HTMLElement;
+    if (target.closest("button") || target.closest("a")) {
+      return;
+    }
+    dragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      initX: position.x,
+      initY: position.y,
+    };
+    setIsDragging(true);
+  };
+
+  const handleHeaderTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
+    const target = e.target as HTMLElement;
+    const touch = e.touches[0];
+    if (target.closest("button") || target.closest("a") || !touch) {
+      return;
+    }
+    dragRef.current = {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      initX: position.x,
+      initY: position.y,
+    };
+    setIsDragging(true);
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -39,9 +213,20 @@ export function AboutModal({
         tabIndex={-1}
       />
 
-      <div className="modal-content about-modal-elegant">
-        {/* Modal Header */}
-        <div className="modal-header">
+      <div
+        className={`modal-content about-modal-elegant ${isDragging ? "is-dragging" : ""}`}
+        style={{
+          transform: `translate3d(${position.x}px, ${position.y}px, 0)`,
+          transition: isDragging ? "none" : "transform 0.08s ease-out",
+        }}
+      >
+        {/* Modal Header with Draggable Gripper */}
+        <div
+          className="modal-header draggable-header"
+          onMouseDown={handleHeaderMouseDown}
+          onTouchStart={handleHeaderTouchStart}
+          title="Click and drag to move this dialog"
+        >
           <div className="about-header-branding">
             <img
               src={appIcon}
@@ -55,21 +240,27 @@ export function AboutModal({
               <div className="about-subtitle-row">
                 <span className="about-tag">Desktop Suite</span>
                 <span className="about-tag tag-accent">
-                  v{version || "1.1.1"}
+                  v{version || "1.1.2"}
                 </span>
                 <span className="about-tag tag-muted">MIT License</span>
               </div>
             </div>
           </div>
-          <button
-            type="button"
-            className="btn-icon modal-close-btn"
-            onClick={onClose}
-            aria-label="Close dialog"
-            title="Close"
-          >
-            ✕
-          </button>
+
+          <div className="about-header-actions">
+            <span className="drag-indicator-handle" title="Drag to move window">
+              ⠿
+            </span>
+            <button
+              type="button"
+              className="btn-icon modal-close-btn"
+              onClick={onClose}
+              aria-label="Close dialog"
+              title="Close"
+            >
+              ✕
+            </button>
+          </div>
         </div>
 
         {/* Modal Scrollable Body */}
@@ -81,8 +272,8 @@ export function AboutModal({
               ultra-fast IPv4 &amp; IPv6 Subnet Calculator desktop application.
               Engineered with deterministic pure bitwise arithmetic, instant
               mask synchronization, bitmapped visualizers, FLSM/VLSM
-              decomposition, CIDR aggregation, and an authentic 14-palette
-              multi-theme engine.
+              decomposition, CIDR aggregation, Multi-Cloud VPC reservation
+              profiles, and a premier 25 developer theme families engine.
             </p>
           </section>
 
@@ -105,10 +296,20 @@ export function AboutModal({
               <div className="about-feature-box">
                 <span className="about-feature-icon">🎨</span>
                 <div>
-                  <strong>14 Multi-Theme Engine</strong>
+                  <strong>25 Developer Theme Families</strong>
                   <p>
-                    Catppuccin, Dracula, Gruvbox, Solarized, and Tomorrow
-                    palettes.
+                    Catppuccin, Dracula, Tokyo Night, Nord, One Dark, Gruvbox,
+                    Solarized, and 18 more developer palettes.
+                  </p>
+                </div>
+              </div>
+              <div className="about-feature-box">
+                <span className="about-feature-icon">☁️</span>
+                <div>
+                  <strong>Multi-Cloud Reservation Profiles</strong>
+                  <p>
+                    AWS VPC, Azure VNet, Google Cloud (GCP), Oracle (OCI), and
+                    Standard RFC 1918 allocations.
                   </p>
                 </div>
               </div>
@@ -129,6 +330,16 @@ export function AboutModal({
                   <p>
                     Hierarchical allocations, efficiency analytics, and CSV
                     exports.
+                  </p>
+                </div>
+              </div>
+              <div className="about-feature-box">
+                <span className="about-feature-icon">🪟</span>
+                <div>
+                  <strong>Universal Cross-Platform</strong>
+                  <p>
+                    Native macOS (Apple Silicon ARM64 &amp; Intel), Windows (x64
+                    &amp; x86), and Linux.
                   </p>
                 </div>
               </div>
@@ -253,8 +464,8 @@ export function AboutModal({
                   alsyundawy/SubnetCalc-MacOS
                 </a>
                 {"): "}
-                Modernized Swift 6 Universal 2 macOS edition with 14
-                multi-themes, cloud profiles, and CI/CD automation.
+                Modernized Swift 6 Universal 2 macOS edition with 25 theme
+                families, cloud profiles, and CI/CD automation.
               </li>
             </ul>
           </section>
