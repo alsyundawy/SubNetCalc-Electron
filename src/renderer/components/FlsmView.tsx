@@ -45,16 +45,11 @@ export const FlsmView: React.FC = () => {
   }>(() => {
     try {
       const parsed = parseSubnetInput(networkInput);
-      if (parsed.family !== 4) {
-        return {
-          result: null,
-          error: "FLSM currently supports IPv4 networks only.",
-        };
-      }
       const res = calculateFLSM(
         parsed.addressString,
         parsed.prefix,
         subnetsCount,
+        parsed.family,
       );
       return { result: res, error: null };
     } catch (err: unknown) {
@@ -93,7 +88,8 @@ export const FlsmView: React.FC = () => {
         { key: "totalHosts", label: "Total Hosts" },
       ]);
 
-      downloadCsv(csv, `flsm_${result.baseNetwork}_${result.basePrefix}.csv`);
+      const safeBaseName = result.baseNetwork.replace(/[:.]/g, "_");
+      downloadCsv(csv, `flsm_${safeBaseName}_${result.basePrefix}.csv`);
     } catch {
       // Ignore
     }
@@ -101,7 +97,10 @@ export const FlsmView: React.FC = () => {
 
   const handleCopySubnet = (sub: FLSMSubnet) => {
     try {
-      const text = `${sub.subnetId}/${sub.prefix} (Hosts: ${sub.hostRange.first} - ${sub.hostRange.last}, BC: ${sub.broadcast})`;
+      const isV6 = sub.broadcast.startsWith("N/A");
+      const text = isV6
+        ? `${sub.subnetId}/${sub.prefix} (Hosts: ${sub.hostRange.first} - ${sub.hostRange.last})`
+        : `${sub.subnetId}/${sub.prefix} (Hosts: ${sub.hostRange.first} - ${sub.hostRange.last}, BC: ${sub.broadcast})`;
       void navigator.clipboard.writeText(text);
       setCopiedIndex(sub.index);
       setTimeout(() => setCopiedIndex(null), 1500);
@@ -114,7 +113,11 @@ export const FlsmView: React.FC = () => {
       <div className="view-control-bar">
         <div className="control-group">
           <label htmlFor={baseNetworkInputId} className="control-label">
-            Base Network / CIDR:
+            Base Network / CIDR{" "}
+            <span className="control-label-hint">
+              (IPv4: /0–/32 | IPv6: /0–/128)
+            </span>
+            :
           </label>
           <input
             id={baseNetworkInputId}
@@ -122,8 +125,8 @@ export const FlsmView: React.FC = () => {
             className="input-text"
             value={networkInput}
             onChange={(e) => setNetworkInput(e.target.value)}
-            placeholder="e.g. 192.168.1.0/24"
-            aria-label="Base network CIDR"
+            placeholder="e.g. 192.168.1.0/24 or 2001:db8::/48"
+            aria-label="Base network CIDR (IPv4 /0–/32, IPv6 /0–/128)"
           />
         </div>
 

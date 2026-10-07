@@ -36,7 +36,7 @@ export const TabsHeader: React.FC<TabsHeaderProps> = ({
 }) => {
   const tabs: { id: ActiveTab; label: string; icon: string }[] = [
     { id: "calc", label: "Calculator", icon: "🔢" },
-    { id: "flsm", label: "FLSM (Fixed)", icon: "📊" },
+    { id: "flsm", label: "FLSM", icon: "📊" },
     { id: "vlsm", label: "VLSM (Variable)", icon: "📐" },
     { id: "cidr", label: "CIDR Supernetting", icon: "🌐" },
   ];

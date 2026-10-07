@@ -22,6 +22,7 @@ Version 1.1.2 ports key architectural advancements from [`SubnetCalc-MacOS`](htt
 4. **Windows x64 CI/CD Automation Matrix & Enhanced NSIS Installer (`build/installer.nsh`)**: Full GitHub Actions workflow pipeline (`build-windows.yml` & `release-windows.yml`) generating NSIS installers and portable executables. Features advanced NSIS installer architecture inspired by `dail8859/NotepadNext`: dual multi-user installation scopes (All Users / Current User), Windows App Paths shell registration for `SubNetCalc Electron.exe` and `subnetcalc.exe` (allowing direct execution via `Win + R` or command line), Application metadata registration in Windows Shell, and clean uninstallation hooks.
 5. **Standardized Enterprise Code Headers**: All 35 source scripts in `src/` include standardized enterprise header blocks documenting file name, version (`1.1.2`), timestamp, developer contacts, upstream lineage, and MIT licensing.
 6. **Zero Circular Dependencies (Clean DAG Architecture)**: Decoupled engine modules into a strict Directed Acyclic Graph verified by cycle detection tooling.
+7. **Dual-Stack IPv4 & IPv6 FLSM Allocation Engine (`src/engine/flsm.ts`, `src/renderer/components/FlsmView.tsx`)**: Extended Fixed Length Subnet Masking to natively support both IPv4 (/0–/32) and IPv6 (/0–/128) equal-size subnet division with 128-bit BigInt step sizes, RFC 4291 Subnet-Router Anycast compensation, RFC 5952 canonical formatting, and cross-platform CSV export.
 
 ---
 
@@ -41,7 +42,8 @@ Every line of code across `src/engine/`, `src/main/`, `src/preload/`, `src/rende
 - **Remediation**:
   - Implemented boundary checks in `cloud-profile.ts` preventing shift overflows on invalid or extreme prefixes (`prefix > minimumPrefix`).
   - Added strict null guards on touch event lists (`e.touches[0]`) in `AboutModal.tsx`.
-- **Evidence**: 7 test suites, 66 tests passing (100% green).
+  - Implemented 128-bit BigInt arithmetic and boundary validation for IPv6 FLSM in `flsm.ts`, correctly handling /127, /128, and /0 boundaries.
+- **Evidence**: 7 test suites, 72 tests passing (100% green).
 
 ### 3. Syntax Review
 
@@ -78,9 +80,11 @@ Every line of code across `src/engine/`, `src/main/`, `src/preload/`, `src/rende
 
 ### 8. Duplicate Code Review
 
-- **Audit**: Checked for duplicated calculation formulas across IPv4, FLSM, VLSM, and Cloud Profiles.
-- **Remediation**: Subnet bit formatting and prefix-to-mask conversions centralized within engine utilities.
-- **Evidence**: Single source of truth for all mathematical logic.
+- **Audit**: Checked for duplicated calculation formulas across IPv4, FLSM, VLSM, and Cloud Profiles. Also audited all file header comment blocks for double-insertion.
+- **Remediation**:
+  - Subnet bit formatting and prefix-to-mask conversions centralized within engine utilities.
+  - Discovered and removed redundant duplicate `/* ===...=== */` file header blocks in `src/engine/ipv4.ts` and `src/engine/types.ts` that were erroneously prepended twice, creating dead documentation noise. Merged attribution lines into single clean headers.
+- **Evidence**: Single source of truth for all mathematical logic. Zero duplicated headers across all `src/` files.
 
 ### 9. Circular Dependency Review
 
@@ -92,7 +96,7 @@ Every line of code across `src/engine/`, `src/main/`, `src/preload/`, `src/rende
 
 - **Audit**: Profiled bitwise computations and DOM rendering latency.
 - **Remediation**: All calculations execute in O(1) synchronous time. Result cards render directly without virtual DOM thrashing.
-- **Evidence**: Vitest test suite runs 66 comprehensive tests in 1.9s.
+- **Evidence**: Vitest test suite runs 72 comprehensive tests in ~1.0s.
 
 ### 11. Security Vulnerability Review
 
@@ -168,7 +172,7 @@ Mirrored directly from `SubnetCalc-MacOS` (`ThemeManager.swift`):
 | :------------------------------- | :------------------------------------------------------------------- | :-------------------------------- |
 | **TypeScript (`tsc`)**           | Dual strict configuration (`tsconfig.json` & `tsconfig.engine.json`) | **PASSED (0 errors)**             |
 | **Oxlint**                       | High-speed Rust-based AST parser across `src/` and `test/`           | **PASSED (0 errors, 0 warnings)** |
-| **Vitest**                       | 7 test suites (66 tests) with boundary & cloud profile coverage      | **PASSED (66/66 tests green)**    |
+| **Vitest**                       | 7 test suites (72 tests) with boundary & cloud profile coverage      | **PASSED (72/72 tests green)**    |
 | **Circular Dependency Analyzer** | Full DFS cycle detection across all imports in `src/`                | **PASSED (0 cycles / Clean DAG)** |
 | **Vite Bundler**                 | Production SSR & Client bundle generation                            | **PASSED (Built in <400ms)**      |
 | **npm audit**                    | Dependency security vulnerability scanner                            | **PASSED (0 vulnerabilities)**    |

@@ -6,3 +6,6 @@ release/
 .DS_Store
 *.local
 coverage/
+.vscode/.env
+.vscode/devtool_config.json
+.vscode/launch.json

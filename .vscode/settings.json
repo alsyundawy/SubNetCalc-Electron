@@ -1,4 +1,8 @@
 {
   "totalTypeScript.hideAllTips": true,
-  "totalTypeScript.hideBasicTips": true
+  "totalTypeScript.hideBasicTips": true,
+  "files.associations": {
+    "*.cce": "cpp",
+    "*.asc": "cpp"
+  }
 }

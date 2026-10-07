@@ -165,7 +165,7 @@ export const App: React.FC = () => {
   const [result, setResult] = useState<CalculateResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [appVersion, setAppVersion] = useState("1.1.0");
+  const [appVersion, setAppVersion] = useState("1.1.2");
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [history, setHistory] = useState<string[]>([]);
   const [themeId, setThemeId] = useState<string>(DEFAULT_THEME_ID);

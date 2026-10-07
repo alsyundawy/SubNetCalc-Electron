@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **Dual-Stack FLSM Allocation Engine & UI (`src/engine/flsm.ts`, `src/renderer/components/FlsmView.tsx`)**:
+  - Expanded Fixed Length Subnet Masking to natively support both IPv4 (/0–/32) and IPv6 (/0–/128) equal-size subnet division.
+  - Native 128-bit BigInt step sizes, RFC 4291 Subnet-Router Anycast compensation, canonical RFC 5952 formatting, and multicast broadcast notation.
+  - Cross-platform CSV export with sanitized filenames for Windows compatibility.
 - **Multi-Cloud Subnet Reservation Profiles (`src/engine/cloud-profile.ts`)**:
   - Full architectural parity with `SubnetCalc-MacOS` (`IPSubnetcalc.swift`).
   - Implemented 5 cloud reservation profiles:
@@ -66,8 +70,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Zero Circular Dependencies (Pillar 9)**: Decoupled `cloud-profile.ts` and `ipv4.ts`, verifying a clean Directed Acyclic Graph (DAG) architecture across the entire codebase.
 - **Accessibility & Event Management**: Migrated dragging to unified Pointer Events and added accessible keyboard controls to `AboutModal.tsx`.
-- **Expanded Test Suite**: Added `test/cloud-profile.spec.ts` with 4 comprehensive test suites covering all 5 cloud profiles, minimum prefix boundaries, and /31-/32 edge cases. Total 66 tests passing (100% green).
+- **Expanded Test Suite**: Added `test/cloud-profile.spec.ts` with 4 comprehensive test suites covering all 5 cloud profiles, minimum prefix boundaries, and /31-/32 edge cases, plus 6 IPv6 FLSM test suites in `test/flsm.spec.ts`. Total 72 tests passing (100% green).
 - **CI/CD Linter Hardening**: Configured Super-Linter and MegaLinter rules with line-length suppressions and non-blocking vulnerability scanner exemptions for indirect build dependencies.
+- **CI/CD Release Asset Upload Fix**: Fixed `actions/download-artifact` flat-extraction race condition in `release-windows.yml` — installer `.exe` and `.blockmap` files were silently skipped when `download-artifact` extracted a single artifact to the root directory instead of a named subdirectory. Updated both `release-macos.yml` and `release-windows.yml` to handle flat and nested extraction with `shopt -s nullglob` and unified SHA-256 checksum consolidation.
+
+### Fixed
+
+- **FLSM Tab Label Accuracy** (`src/renderer/components/TabsHeader.tsx`): Renamed tab label to simply `FLSM`, removing the redundant "(Fixed)" and "(IPv4)" qualifiers since the tab now natively supports both IPv4 (1-32) and IPv6 (1-128).
+- **Cross-Platform CSV Filename Sanitization** (`src/renderer/components/FlsmView.tsx`): Sanitized colons (`:`) in exported IPv6 filenames to prevent illegal character errors on Windows filesystems.
+- **Hardcoded Fallback Version** (`src/renderer/App.tsx`): Corrected stale fallback `useState("1.1.0")` to `useState("1.1.2")` to display the correct version number when running in browser development mode where Electron IPC is unavailable.
+- **Duplicate File Header Blocks** (`src/engine/ipv4.ts`, `src/engine/types.ts`): Removed redundant duplicate `/* ===...=== */` header comment blocks that were erroneously prepended twice. Each file now has a single clean enterprise header with complete attribution including the `SubnetCalc-MacOS Cloud Profiles Heritage` line retained for `ipv4.ts`.
 
 ---
 
