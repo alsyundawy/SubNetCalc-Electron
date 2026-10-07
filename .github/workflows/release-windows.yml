@@ -113,6 +113,24 @@ jobs:
           fi
           echo "RELEASE_TAG=${TAG}" >> "$GITHUB_ENV"
 
+      - name: Create or Verify Release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          if [ -f "docs/releases/${RELEASE_TAG}.md" ]; then
+            gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
+            gh release create "$RELEASE_TAG" \
+              --title "${RELEASE_TAG}" \
+              --notes-file "docs/releases/${RELEASE_TAG}.md"
+            gh release edit "$RELEASE_TAG" --notes-file "docs/releases/${RELEASE_TAG}.md" || true
+          else
+            gh release view "$RELEASE_TAG" >/dev/null 2>&1 || \
+            gh release create "$RELEASE_TAG" \
+              --title "${RELEASE_TAG}" \
+              --generate-notes
+          fi
+
       - name: Download all artifacts
         uses: actions/download-artifact@v8.0.1
 
@@ -121,18 +139,25 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          echo "=== Downloaded Artifact Directories ==="
+          echo "=== Downloaded Artifacts ==="
           ls -la
 
-          # Upload EXE and blockmap artifacts
-          for dir in subnetcalc-windows-*; do
-            echo "Processing artifact dir: ${dir}"
-            if [ -d "${dir}" ]; then
-              for file in "${dir}"/*.exe "${dir}"/*.blockmap "${dir}"/SHA256SUMS-*.txt; do
-                if [ -f "${file}" ]; then
-                  echo "Uploading ${file} -> Release ${RELEASE_TAG}..."
-                  gh release upload "${RELEASE_TAG}" "${file}" --clobber
-                fi
-              done
+          # Upload EXE, blockmap, and checksum artifacts (supporting both flat and nested extractions)
+          shopt -s nullglob
+          for file in *.exe *.blockmap SHA256SUMS-*.txt subnetcalc-windows-*/*.exe subnetcalc-windows-*/*.blockmap subnetcalc-windows-*/SHA256SUMS-*.txt; do
+            if [ -f "${file}" ]; then
+              echo "Uploading ${file} -> Release ${RELEASE_TAG}..."
+              gh release upload "${RELEASE_TAG}" "${file}" --clobber
             fi
           done
+
+          # Consolidate into unified SHA256SUMS.txt if release already has or needs one
+          gh release download "${RELEASE_TAG}" -p "SHA256SUMS.txt" || true
+          touch SHA256SUMS.txt
+          find . -maxdepth 2 -name "SHA256SUMS-*.txt" ! -name "SHA256SUMS.txt" -exec cat {} + >> SHA256SUMS.txt
+          sort -u SHA256SUMS.txt -o SHA256SUMS.txt
+          if [ -s SHA256SUMS.txt ]; then
+            echo "=== Updated Unified SHA256SUMS.txt ==="
+            cat SHA256SUMS.txt
+            gh release upload "${RELEASE_TAG}" SHA256SUMS.txt --clobber
+          fi

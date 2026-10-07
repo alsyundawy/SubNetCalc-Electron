@@ -161,25 +161,22 @@ jobs:
           echo "=== Downloaded Artifact Directories ==="
           ls -la
 
-          # Consolidate SHA-256 checksums from all architecture builds
-          find . -name "SHA256SUMS-*.txt" -exec cat {} + > SHA256SUMS.txt
+          # Consolidate SHA-256 checksums from all architecture builds (preserve existing from release)
+          gh release download "${RELEASE_TAG}" -p "SHA256SUMS.txt" || true
+          touch SHA256SUMS.txt
+          find . -maxdepth 2 -name "SHA256SUMS-*.txt" ! -name "SHA256SUMS.txt" -exec cat {} + >> SHA256SUMS.txt
+          sort -u SHA256SUMS.txt -o SHA256SUMS.txt
           if [ -s SHA256SUMS.txt ]; then
             echo "=== Consolidated SHA256SUMS.txt ==="
             cat SHA256SUMS.txt
             gh release upload "${RELEASE_TAG}" SHA256SUMS.txt --clobber
           fi
 
-          # Upload DMG, ZIP, and blockmap artifacts
-          for dir in subnetcalc-macos-*; do
-            echo "Processing artifact dir: ${dir}"
-            if [ -d "${dir}" ]; then
-              for file in "${dir}"/*.dmg "${dir}"/*.zip "${dir}"/*.blockmap; do
-                if [ -f "${file}" ]; then
-                  echo "Uploading ${file} -> Release ${RELEASE_TAG}..."
-                  gh release upload "${RELEASE_TAG}" "${file}" --clobber
-                fi
-              done
-            else
-              echo "WARNING: Directory ${dir} not found"
+          # Upload DMG, ZIP, and blockmap artifacts (supporting both flat and nested extractions)
+          shopt -s nullglob
+          for file in *.dmg *.zip *.blockmap subnetcalc-macos-*/*.dmg subnetcalc-macos-*/*.zip subnetcalc-macos-*/*.blockmap; do
+            if [ -f "${file}" ]; then
+              echo "Uploading ${file} -> Release ${RELEASE_TAG}..."
+              gh release upload "${RELEASE_TAG}" "${file}" --clobber
             fi
           done
