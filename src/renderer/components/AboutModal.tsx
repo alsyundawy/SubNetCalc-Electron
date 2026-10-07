@@ -96,11 +96,11 @@ export function AboutModal({
   }, [isOpen, onClose]);
 
   // Window drag event listeners
-  const handleMouseMove = useCallback((e: MouseEvent) => {
+
+  const handlePointerMove = useCallback((e: PointerEvent) => {
     const dx = e.clientX - dragRef.current.startX;
     const dy = e.clientY - dragRef.current.startY;
 
-    // Viewport clamping
     const maxOffsetW = Math.max(100, window.innerWidth / 2 - 80);
     const maxOffsetH = Math.max(100, window.innerHeight / 2 - 80);
 
@@ -116,62 +116,28 @@ export function AboutModal({
     setPosition({ x: clampedX, y: clampedY });
   }, []);
 
-  const handleMouseUp = useCallback(() => {
-    setIsDragging(false);
-  }, []);
-
-  const handleTouchMove = useCallback((e: TouchEvent) => {
-    const touch = e.touches[0];
-    if (!touch) return;
-    const dx = touch.clientX - dragRef.current.startX;
-    const dy = touch.clientY - dragRef.current.startY;
-
-    const maxOffsetW = Math.max(100, window.innerWidth / 2 - 80);
-    const maxOffsetH = Math.max(100, window.innerHeight / 2 - 80);
-
-    const clampedX = Math.max(
-      -maxOffsetW,
-      Math.min(maxOffsetW, dragRef.current.initX + dx),
-    );
-    const clampedY = Math.max(
-      -maxOffsetH,
-      Math.min(maxOffsetH, dragRef.current.initY + dy),
-    );
-
-    setPosition({ x: clampedX, y: clampedY });
-  }, []);
-
-  const handleTouchEnd = useCallback(() => {
+  const handlePointerUp = useCallback(() => {
     setIsDragging(false);
   }, []);
 
   useEffect(() => {
     if (isDragging) {
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-      window.addEventListener("touchmove", handleTouchMove);
-      window.addEventListener("touchend", handleTouchEnd);
+      window.addEventListener("pointermove", handlePointerMove);
+      window.addEventListener("pointerup", handlePointerUp);
+      window.addEventListener("pointercancel", handlePointerUp);
     } else {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
     }
     return () => {
-      window.removeEventListener("mousemove", handleMouseMove);
-      window.removeEventListener("mouseup", handleMouseUp);
-      window.removeEventListener("touchmove", handleTouchMove);
-      window.removeEventListener("touchend", handleTouchEnd);
+      window.removeEventListener("pointermove", handlePointerMove);
+      window.removeEventListener("pointerup", handlePointerUp);
+      window.removeEventListener("pointercancel", handlePointerUp);
     };
-  }, [
-    isDragging,
-    handleMouseMove,
-    handleMouseUp,
-    handleTouchMove,
-    handleTouchEnd,
-  ]);
+  }, [isDragging, handlePointerMove, handlePointerUp]);
 
-  const handleHeaderMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
+  const handleHeaderPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
     // Only initiate drag if not clicking buttons or interactive links
     const target = e.target as HTMLElement;
     if (target.closest("button") || target.closest("a")) {
@@ -180,21 +146,6 @@ export function AboutModal({
     dragRef.current = {
       startX: e.clientX,
       startY: e.clientY,
-      initX: position.x,
-      initY: position.y,
-    };
-    setIsDragging(true);
-  };
-
-  const handleHeaderTouchStart = (e: React.TouchEvent<HTMLDivElement>) => {
-    const target = e.target as HTMLElement;
-    const touch = e.touches[0];
-    if (target.closest("button") || target.closest("a") || !touch) {
-      return;
-    }
-    dragRef.current = {
-      startX: touch.clientX,
-      startY: touch.clientY,
       initX: position.x,
       initY: position.y,
     };
@@ -223,22 +174,7 @@ export function AboutModal({
         {/* Modal Header with Draggable Gripper */}
         <div
           className="modal-header draggable-header"
-          role="region"
-          aria-label="Draggable dialog header"
-          tabIndex={0}
-          onMouseDown={handleHeaderMouseDown}
-          onTouchStart={handleHeaderTouchStart}
-          onKeyDown={(e) => {
-            if (e.key === "ArrowUp") {
-              setPosition((p) => ({ ...p, y: Math.max(20, p.y - 10) }));
-            } else if (e.key === "ArrowDown") {
-              setPosition((p) => ({ ...p, y: p.y + 10 }));
-            } else if (e.key === "ArrowLeft") {
-              setPosition((p) => ({ ...p, x: Math.max(20, p.x - 10) }));
-            } else if (e.key === "ArrowRight") {
-              setPosition((p) => ({ ...p, x: p.x + 10 }));
-            }
-          }}
+          onPointerDown={handleHeaderPointerDown}
           title="Click and drag to move this dialog"
         >
           <div className="about-header-branding">
@@ -262,9 +198,25 @@ export function AboutModal({
           </div>
 
           <div className="about-header-actions">
-            <span className="drag-indicator-handle" title="Drag to move window">
+            <button
+              type="button"
+              className="drag-indicator-handle"
+              onKeyDown={(e) => {
+                if (e.key === "ArrowUp") {
+                  setPosition((p) => ({ ...p, y: Math.max(-200, p.y - 10) }));
+                } else if (e.key === "ArrowDown") {
+                  setPosition((p) => ({ ...p, y: Math.min(200, p.y + 10) }));
+                } else if (e.key === "ArrowLeft") {
+                  setPosition((p) => ({ ...p, x: Math.max(-300, p.x - 10) }));
+                } else if (e.key === "ArrowRight") {
+                  setPosition((p) => ({ ...p, x: Math.min(300, p.x + 10) }));
+                }
+              }}
+              aria-label="Reposition dialog with arrow keys"
+              title="Move window (drag or use arrow keys)"
+            >
               ⠿
-            </span>
+            </button>
             <button
               type="button"
               className="btn-icon modal-close-btn"

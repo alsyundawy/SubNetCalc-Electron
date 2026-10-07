@@ -22,13 +22,13 @@
   <a href="https://www.electronjs.org/"><img src="https://img.shields.io/badge/Engine-Electron%2044%20%7C%20Node%2024-47848F?style=for-the-badge&logo=electron&logoColor=white" alt="Electron Engine"></a>
   <a href="https://react.dev/"><img src="https://img.shields.io/badge/UI-React%2019-61DAFB?style=for-the-badge&logo=react&logoColor=black" alt="React 19"></a>
   <a href="https://www.typescriptlang.org/"><img src="https://img.shields.io/badge/TypeScript-7.x-3178C6?style=for-the-badge&logo=typescript&logoColor=white" alt="TypeScript 7.x"></a>
-  <a href="#downloads--artifact-catalogs"><img src="https://img.shields.io/badge/Architecture-ARM64%20%7C%20x64%20%7C%20ia32-8957e5?style=for-the-badge&logo=intel&logoColor=white" alt="Universal Architecture"></a>
+  <a href="#downloads--artifact-catalogs"><img src="https://img.shields.io/badge/Architecture-ARM64%20%7C%20Intel%20x64%20%7C%20Win%20x64-8957e5?style=for-the-badge&logo=intel&logoColor=white" alt="Universal Architecture"></a>
   <a href="https://github.com/alsyundawy/SubNetCalc-Electron/blob/main/LICENSE"><img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" alt="MIT License"></a>
   <a href="https://github.com/alsyundawy/SubNetCalc-Electron"><img src="https://img.shields.io/badge/Vulnerabilities-0%20(npm%20audit)-success?style=for-the-badge&logo=security&logoColor=white" alt="Zero Vulnerabilities"></a>
 </p>
 
 <p align="center">
-  A production-grade, highly optimized, and zero-vulnerability desktop application for calculating IPv4 and IPv6 subnets, network boundaries, binary bit allocations, and address classifications. Combining the mathematical rigor and RFC test oracle parity of the canonical <strong>SubNetCalc</strong> CLI tool by Dr. Thomas Dreibholz with the workflow concepts (interactive mask sync, FLSM, VLSM, CIDR summarization) of Julien Mulot's macOS SubnetCalc and the 25-theme aesthetic of Harry Dertin Sutisna Alsyundawy's SubnetCalc-MacOS, re-engineered for modern desktop environments with pure TypeScript, zero window scrolling, real-time bit visualizer, multi-cloud subnet reservation engine (AWS, Azure, GCP, OCI), draggable About modal, local GeoIP lookup, and automated Windows x86/x64 CI/CD builders.
+  A production-grade, highly optimized, and zero-vulnerability desktop application for calculating IPv4 and IPv6 subnets, network boundaries, binary bit allocations, and address classifications. Combining the mathematical rigor and RFC test oracle parity of the canonical <strong>SubNetCalc</strong> CLI tool by Dr. Thomas Dreibholz with the workflow concepts (interactive mask sync, FLSM, VLSM, CIDR summarization) of Julien Mulot's macOS SubnetCalc and the 25-theme aesthetic of Harry Dertin Sutisna Alsyundawy's SubnetCalc-MacOS, re-engineered for modern desktop environments with pure TypeScript, zero window scrolling, real-time bit visualizer, multi-cloud subnet reservation engine (AWS, Azure, GCP, OCI), draggable About modal, local GeoIP lookup, and automated Windows x64 CI/CD builders.
 </p>
 
 <p align="center">
@@ -115,7 +115,7 @@ Traditional subnet calculators often suffer from major limitations: they are eit
 5. **Multi-Cloud Subnet Reservation Engine**: Exact usable address and reserved boundary calculations for Standard RFC 1918, AWS VPC (5 reserved), Azure VNet (5 reserved), GCP (4 reserved), and Oracle Cloud OCI (3 reserved) with expandable role breakdowns.
 6. **Draggable Floating About Modal**: Moveable dialog with mouse/touch drag physics, boundary clamping, and tactile grab affordances.
 7. **Comprehensive Protocol Support**: Full compliance with RFC 791 (IPv4), RFC 4291 (IPv6 Architecture), RFC 4193 (Unique Local IPv6), RFC 5952 (Canonical IPv6 Formatting), and RFC 3021 (31-bit Point-to-Point Links).
-8. **Automated Windows CI/CD Builders**: GitHub Actions workflows building native x64 and ia32 (x86) NSIS installers and portable executables.
+8. **Windows x64 CI/CD & Enhanced NSIS Installer**: GitHub Actions workflows building Windows x64 NSIS installers and portable executables. Incorporates advanced NSIS architecture inspired by NotepadNext (`build/installer.nsh`): dual multi-user installation scopes (All Users / Current User), Windows App Paths shell integration (`Win + R` or `subnetcalc.exe`), and clean uninstallation hooks.
 9. **Low-Footprint Governance**: Active memory supervisor monitoring RAM utilization (<100 MB RSS target), self-contained bundling eliminating `node_modules` inside production ASAR archives, and background process throttling.
 10. **Zero Vulnerability Guarantee**: Zero CVEs reported across all dependencies on `npm audit`, hardened Content Security Policy (CSP), context-isolated preload bridges, and sandbox enforcement.
 
@@ -123,21 +123,21 @@ Traditional subnet calculators often suffer from major limitations: they are eit
 
 ## Key Features & Capabilities Matrix
 
-| Capability                            | Technical Implementation                                                                                                | Benefit                                                                                                 |
-| :------------------------------------ | :---------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
-| **Pure TypeScript Subnet Engine**     | Synchronous bitwise arithmetic with 128-bit `BigInt` precision and zero external calculation libraries.                 | 100% offline functionality, immediate keystroke recalculation, and identical outputs to upstream CLI.   |
-| **25-Family Multi-Theme Engine**      | 75 authentic developer presets structured in 25 families with `<optgroup>` grouping and dynamic CSS variable injection. | Unmatched aesthetic personalization matching top IDE themes from 2020–2026.                             |
-| **Multi-Cloud Subnet Profiles**       | Mathematical cloud reservation engine for AWS, Azure, GCP, OCI, and Standard RFC 1918 with role breakdowns.             | Instant insight into usable IP capacities and cloud platform subnet constraints (/28 AWS, /29 Azure).   |
-| **Draggable Floating About Dialog**   | Viewport-clamped mouse and touch drag controller with tactile grab affordances and auto-reset coordinates.              | Non-intrusive floating dialog that can be moved anywhere on the screen without covering metrics.        |
-| **Dual-Architecture Windows Runners** | GitHub Actions workflow matrix compiling for Windows x64 and ia32 (x86) in NSIS and portable formats.                   | Seamless native distribution across modern 64-bit and legacy 32-bit Windows workstations.               |
-| **Live RFC Classification Badges**    | Real-time IP address scope analyzer mapping address space to RFC 1918, 6598, 4193, 4291, 5737, and 1112.                | Instant visual identification of private, CGNAT, documentation, loopback, or public internet addresses. |
-| **Binary Bit Visualizer**             | Interactive rendered grid mapping network prefix bits, borrowed subnet bits, and host interface bits.                   | Instant visual clarity on bit boundary divisions and subnet sizing without manual calculation.          |
-| **FLSM & VLSM Allocation Suite**      | Fixed & Variable Length Subnet Mask deconstruction engines with live capacity bars and RFC 4180 CSV export.             | Professional network design with waste optimization and spreadsheet-safe data export.                   |
-| **RFC 3021 /31 PtP Support**          | Automatic recognition of 31-bit IPv4 subnets without broadcast address allocation.                                      | Accurate host provisioning for modern point-to-point router links.                                      |
-| **RFC 4193 Unique Local IPv6 (ULA)**  | Cryptographically secure pseudo-random Global ID generation using OS random bytes.                                      | Generates standards-compliant `fd00::/8` non-routable private subnets on demand.                        |
-| **Asynchronous Reverse DNS**          | Non-blocking PTR lookup through Node.js asynchronous DNS resolver with timeout clearance.                               | Displays canonical hostnames without freezing calculation rendering or leaking timer handles.           |
-| **Local Offline GeoIP Lookup**        | MaxMind MMDB binary parser bundled self-contained into the main bundle with zero native C/C++ addons.                   | Pinpoints country code and location from local databases without telemetry or external tracking.        |
-| **Two-Column Compact Dashboard**      | CSS Grid dashboard with metric cards on the left and tabbed attributes & calculation history on the right.              | Perfectly fixed viewport with zero outer window scrolling on any desktop display.                       |
+| Capability                            | Technical Implementation                                                                                                                 | Benefit                                                                                                 |
+| :------------------------------------ | :--------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
+| **Pure TypeScript Subnet Engine**     | Synchronous bitwise arithmetic with 128-bit `BigInt` precision and zero external calculation libraries.                                  | 100% offline functionality, immediate keystroke recalculation, and identical outputs to upstream CLI.   |
+| **25-Family Multi-Theme Engine**      | 75 authentic developer presets structured in 25 families with `<optgroup>` grouping and dynamic CSS variable injection.                  | Unmatched aesthetic personalization matching top IDE themes from 2020–2026.                             |
+| **Multi-Cloud Subnet Profiles**       | Mathematical cloud reservation engine for AWS, Azure, GCP, OCI, and Standard RFC 1918 with role breakdowns.                              | Instant insight into usable IP capacities and cloud platform subnet constraints (/28 AWS, /29 Azure).   |
+| **Draggable Floating About Dialog**   | Viewport-clamped mouse and touch drag controller with tactile grab affordances and auto-reset coordinates.                               | Non-intrusive floating dialog that can be moved anywhere on the screen without covering metrics.        |
+| **Windows x64 CI/CD & Enhanced NSIS** | GitHub Actions workflow compiling Windows x64 NSIS installers and portable formats with custom installer script (`build/installer.nsh`). | Automated Windows x64 distribution, multi-user installation scopes, and Windows App Paths integration.  |
+| **Live RFC Classification Badges**    | Real-time IP address scope analyzer mapping address space to RFC 1918, 6598, 4193, 4291, 5737, and 1112.                                 | Instant visual identification of private, CGNAT, documentation, loopback, or public internet addresses. |
+| **Binary Bit Visualizer**             | Interactive rendered grid mapping network prefix bits, borrowed subnet bits, and host interface bits.                                    | Instant visual clarity on bit boundary divisions and subnet sizing without manual calculation.          |
+| **FLSM & VLSM Allocation Suite**      | Fixed & Variable Length Subnet Mask deconstruction engines with live capacity bars and RFC 4180 CSV export.                              | Professional network design with waste optimization and spreadsheet-safe data export.                   |
+| **RFC 3021 /31 PtP Support**          | Automatic recognition of 31-bit IPv4 subnets without broadcast address allocation.                                                       | Accurate host provisioning for modern point-to-point router links.                                      |
+| **RFC 4193 Unique Local IPv6 (ULA)**  | Cryptographically secure pseudo-random Global ID generation using OS random bytes.                                                       | Generates standards-compliant `fd00::/8` non-routable private subnets on demand.                        |
+| **Asynchronous Reverse DNS**          | Non-blocking PTR lookup through Node.js asynchronous DNS resolver with timeout clearance.                                                | Displays canonical hostnames without freezing calculation rendering or leaking timer handles.           |
+| **Local Offline GeoIP Lookup**        | MaxMind MMDB binary parser bundled self-contained into the main bundle with zero native C/C++ addons.                                    | Pinpoints country code and location from local databases without telemetry or external tracking.        |
+| **Two-Column Compact Dashboard**      | CSS Grid dashboard with metric cards on the left and tabbed attributes & calculation history on the right.                               | Perfectly fixed viewport with zero outer window scrolling on any desktop display.                       |
 
 ---
 
@@ -257,16 +257,14 @@ To ensure minimal CPU impact and long battery life on MacBook systems:
 
 Official signed and verified application binaries for macOS and Windows:
 
-| Target Architecture           | Platform | Package Type     | Minimum OS    | File Artifact Name                                | Typical Size |
-| :---------------------------- | :------- | :--------------- | :------------ | :------------------------------------------------ | :----------- |
-| **Apple Silicon (ARM64)**     | macOS    | `.dmg` Installer | macOS 12+     | `SubNetCalc-Electron-1.1.2-arm64.dmg`             | ~113 MiB     |
-| **Apple Silicon (ARM64)**     | macOS    | Portable `.zip`  | macOS 12+     | `SubNetCalc-Electron-1.1.2-arm64.zip`             | ~123 MiB     |
-| **Intel x64**                 | macOS    | `.dmg` Installer | macOS 12+     | `SubNetCalc-Electron-1.1.2-x64.dmg`               | ~115 MiB     |
-| **Intel x64**                 | macOS    | Portable `.zip`  | macOS 12+     | `SubNetCalc-Electron-1.1.2-x64.zip`               | ~127 MiB     |
-| **Windows 64-bit (x64)**      | Windows  | NSIS Installer   | Windows 10/11 | `SubNetCalc-Electron-1.1.2-win-x64-Setup.exe`     | ~85 MiB      |
-| **Windows 64-bit (x64)**      | Windows  | Portable `.exe`  | Windows 10/11 | `SubNetCalc-Electron-1.1.2-win-x64-portable.exe`  | ~90 MiB      |
-| **Windows 32-bit (ia32/x86)** | Windows  | NSIS Installer   | Windows 10/11 | `SubNetCalc-Electron-1.1.2-win-ia32-Setup.exe`    | ~80 MiB      |
-| **Windows 32-bit (ia32/x86)** | Windows  | Portable `.exe`  | Windows 10/11 | `SubNetCalc-Electron-1.1.2-win-ia32-portable.exe` | ~85 MiB      |
+| Target Architecture       | Platform | Package Type     | Minimum OS    | File Artifact Name                               | Typical Size |
+| :------------------------ | :------- | :--------------- | :------------ | :----------------------------------------------- | :----------- |
+| **Apple Silicon (ARM64)** | macOS    | `.dmg` Installer | macOS 12+     | `SubNetCalc-Electron-1.1.2-arm64.dmg`            | ~113 MiB     |
+| **Apple Silicon (ARM64)** | macOS    | Portable `.zip`  | macOS 12+     | `SubNetCalc-Electron-1.1.2-arm64.zip`            | ~123 MiB     |
+| **Intel x64**             | macOS    | `.dmg` Installer | macOS 12+     | `SubNetCalc-Electron-1.1.2-x64.dmg`              | ~115 MiB     |
+| **Intel x64**             | macOS    | Portable `.zip`  | macOS 12+     | `SubNetCalc-Electron-1.1.2-x64.zip`              | ~127 MiB     |
+| **Windows 64-bit (x64)**  | Windows  | NSIS Installer   | Windows 10/11 | `SubNetCalc-Electron-1.1.2-win-x64-Setup.exe`    | ~85 MiB      |
+| **Windows 64-bit (x64)**  | Windows  | Portable `.exe`  | Windows 10/11 | `SubNetCalc-Electron-1.1.2-win-x64-portable.exe` | ~90 MiB      |
 
 ---
 

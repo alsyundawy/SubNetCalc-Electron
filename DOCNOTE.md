@@ -1,10 +1,12 @@
+<!-- markdownlint-disable-file MD013 MD033 -->
+
 # SubNetCalc Electron — Technical Documentation Notes (DOCNOTE)
 
 > **Release Version**: `v1.1.2` (Multi-Cloud VPC Profiles, 25-Theme Engine, Draggable Modal, Windows CI/CD & Enterprise Hardening)<br />
 > **Author & Maintainer**: [`Harry Dertin Sutisna Alsyundawy (@alsyundawy)`](https://github.com/alsyundawy)<br />
 > **Repository**: [`https://github.com/alsyundawy/SubNetCalc-Electron`](https://github.com/alsyundawy/SubNetCalc-Electron)<br />
 > **Upstream Project & Heritage**: Inspired by [`dreibh/subnetcalc`](https://github.com/dreibh/subnetcalc) by Dr. Thomas Dreibholz, [`mulot/SubnetCalc`](https://github.com/mulot/SubnetCalc) by Julien Mulot, and [`alsyundawy/SubnetCalc-MacOS`](https://github.com/alsyundawy/SubnetCalc-MacOS)<br />
-> **Architecture Target**: Universal macOS (Apple Silicon ARM64 & Intel Core x64), Windows (x64 & x86), and Linux
+> **Architecture Target**: Universal macOS (Apple Silicon ARM64 & Intel Core x64), Windows (x64), and Linux
 
 ---
 
@@ -15,9 +17,9 @@
 Version 1.1.2 ports key architectural advancements from [`SubnetCalc-MacOS`](https://github.com/alsyundawy/SubnetCalc-MacOS), expanding the capabilities into a true cross-platform enterprise suite:
 
 1. **Multi-Cloud Subnet Reservation Profiles Engine (`src/engine/cloud-profile.ts`)**: Mathematical reservation parity with AWS VPC (5 reserved addresses, /28 min), Azure VNet (5 reserved addresses, /29 min), Google Cloud GCP (4 reserved addresses, /29 min), Oracle Cloud OCI (3 reserved addresses, /30 min), and Standard RFC 1918.
-2. **Interactive Draggable & Moveable About Modal (`src/renderer/components/AboutModal.tsx`)**: Modal dialog can be fluidly repositioned across the screen with mouse and touch gestures, complete with viewport clamping and automatic reset.
+2. **Interactive Draggable & Moveable About Modal (`src/renderer/components/AboutModal.tsx`)**: Modal dialog can be fluidly repositioned across the screen with pointer and touch gestures, complete with viewport clamping, native keyboard navigation, and automatic reset.
 3. **Premier 25 Developer Theme Families Engine (`src/renderer/themes.ts`)**: Expanded from 14 palettes to 25 iconic families (75 total calibrated presets) covering 2020–2026 developer trends with WCAG AAA contrast compliance.
-4. **Windows x64 & x86 (ia32) CI/CD Automation Matrix**: Full GitHub Actions workflow pipeline (`build-windows.yml` & `release-windows.yml`) generating NSIS installers and portable executables.
+4. **Windows x64 CI/CD Automation Matrix & Enhanced NSIS Installer (`build/installer.nsh`)**: Full GitHub Actions workflow pipeline (`build-windows.yml` & `release-windows.yml`) generating NSIS installers and portable executables. Features advanced NSIS installer architecture inspired by `dail8859/NotepadNext`: dual multi-user installation scopes (All Users / Current User), Windows App Paths shell registration for `SubNetCalc Electron.exe` and `subnetcalc.exe` (allowing direct execution via `Win + R` or command line), Application metadata registration in Windows Shell, and clean uninstallation hooks.
 5. **Standardized Enterprise Code Headers**: All 35 source scripts in `src/` include standardized enterprise header blocks documenting file name, version (`1.1.2`), timestamp, developer contacts, upstream lineage, and MIT licensing.
 6. **Zero Circular Dependencies (Clean DAG Architecture)**: Decoupled engine modules into a strict Directed Acyclic Graph verified by cycle detection tooling.
 

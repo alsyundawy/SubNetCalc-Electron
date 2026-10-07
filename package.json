@@ -57,8 +57,7 @@
     "dist:mac:universal": "npm run clean && npm run build && electron-builder --mac --universal -p never",
     "dist:win": "npm run clean && npm run build && electron-builder --win -p never",
     "dist:win:x64": "npm run clean && npm run build && electron-builder --win --x64 -p never",
-    "dist:win:ia32": "npm run clean && npm run build && electron-builder --win --ia32 -p never",
-    "dist:win:all": "npm run clean && npm run build && electron-builder --win --x64 --ia32 -p never"
+    "dist:win:all": "npm run clean && npm run build && electron-builder --win --x64 -p never"
   },
   "dependencies": {
     "maxmind": "^5.0.7",

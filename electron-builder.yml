@@ -33,14 +33,19 @@ win:
     - target: nsis
       arch:
         - x64
-        - ia32
     - target: portable
       arch:
         - x64
-        - ia32
 nsis:
   oneClick: false
+  perMachine: false
+  allowElevation: true
   allowToChangeInstallationDirectory: true
   createDesktopShortcut: always
   createStartMenuShortcut: true
   shortcutName: SubNetCalc Electron
+  runAfterFinish: true
+  include: build/installer.nsh
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  deleteAppDataOnUninstall: false
