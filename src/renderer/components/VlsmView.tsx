@@ -73,7 +73,14 @@ export const VlsmView: React.FC = () => {
       if (parsed.family !== 4) {
         return {
           result: null,
-          error: "VLSM currently supports IPv4 networks only.",
+          error:
+            "VLSM is designed for IPv4 networks only (max prefix /32). For IPv6 subnetting, please use the FLSM tab.",
+        };
+      }
+      if (parsed.prefix > 32) {
+        return {
+          result: null,
+          error: `IPv4 prefix /${parsed.prefix} is out of range (max prefix is /32).`,
         };
       }
       const res = calculateVLSM(
@@ -150,7 +157,7 @@ export const VlsmView: React.FC = () => {
       <div className="view-control-bar">
         <div className="control-group">
           <label htmlFor={baseNetworkInputId} className="control-label">
-            Base Parent Network / CIDR:
+            Base Parent Network / CIDR <span className="control-label-hint">(IPv4 only: /0–/32)</span>:
           </label>
           <input
             id={baseNetworkInputId}
@@ -158,8 +165,8 @@ export const VlsmView: React.FC = () => {
             className="input-text"
             value={networkInput}
             onChange={(e) => setNetworkInput(e.target.value)}
-            placeholder="e.g. 192.168.0.0/24"
-            aria-label="Parent network CIDR"
+            placeholder="e.g. 192.168.0.0/24 (max /32)"
+            aria-label="Parent network CIDR (IPv4 only /0–/32)"
           />
         </div>
 

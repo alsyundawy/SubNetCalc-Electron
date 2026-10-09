@@ -42,10 +42,10 @@ export interface FLSMResult {
   family: AddressFamily;
   baseNetwork: string;
   basePrefix: number;
-  subnetsNeeded: number;
+  subnetsNeeded: number | string;
   borrowedBits: number;
   allocatedPrefix: number;
-  totalSubnetsCreated: number;
+  totalSubnetsCreated: number | string;
   usableHostsPerSubnet: number | string;
   subnets: FLSMSubnet[];
 }
@@ -83,7 +83,8 @@ function computeHostRangeV4(
 function calculateFLSMIPv4(
   networkInput: string,
   prefix: number,
-  subnetsNeeded: number,
+  subnetsNeededOrTargetPrefix: number,
+  mode: "subnets" | "prefix" = "subnets",
 ): FLSMResult {
   const baseAddr = parseIPv4ToUint32(networkInput);
   if (baseAddr === null) {
@@ -92,19 +93,40 @@ function calculateFLSMIPv4(
   if (prefix < 0 || prefix > 32) {
     throw new Error(`Prefix /${prefix} is out of range for IPv4 (0-32)`);
   }
-  if (!Number.isInteger(subnetsNeeded) || subnetsNeeded < 1) {
-    throw new Error("Number of subnets needed must be at least 1");
-  }
 
-  // Compute borrowed bits
-  const borrowedBits =
-    subnetsNeeded === 1 ? 0 : Math.ceil(Math.log2(subnetsNeeded));
-  const allocatedPrefix = prefix + borrowedBits;
+  let allocatedPrefix: number;
+  let borrowedBits: number;
+  let totalSubnets: number;
 
-  if (allocatedPrefix > 32) {
-    throw new Error(
-      `Cannot allocate ${subnetsNeeded} subnets from /${prefix}: requires /${allocatedPrefix} which exceeds 32 bits capacity`,
-    );
+  if (mode === "prefix") {
+    allocatedPrefix = subnetsNeededOrTargetPrefix;
+    if (
+      !Number.isInteger(allocatedPrefix) ||
+      allocatedPrefix < prefix ||
+      allocatedPrefix > 32
+    ) {
+      throw new Error(
+        `Target prefix /${allocatedPrefix} must be between /${prefix} and /32 for IPv4`,
+      );
+    }
+    borrowedBits = allocatedPrefix - prefix;
+    totalSubnets = 2 ** borrowedBits;
+  } else {
+    const subnetsNeeded = subnetsNeededOrTargetPrefix;
+    if (!Number.isInteger(subnetsNeeded) || subnetsNeeded < 1) {
+      throw new Error("Number of subnets needed must be at least 1");
+    }
+
+    borrowedBits =
+      subnetsNeeded === 1 ? 0 : Math.ceil(Math.log2(subnetsNeeded));
+    allocatedPrefix = prefix + borrowedBits;
+
+    if (allocatedPrefix > 32) {
+      throw new Error(
+        `Cannot allocate ${subnetsNeeded} subnets from /${prefix}: requires /${allocatedPrefix} which exceeds 32 bits capacity (IPv4 max /32)`,
+      );
+    }
+    totalSubnets = 2 ** borrowedBits;
   }
 
   const mask = prefixToMask32(prefix);
@@ -115,7 +137,9 @@ function calculateFLSMIPv4(
   const allocMaskStr = uint32ToIPv4(allocMask);
   const wildcardStr = uint32ToIPv4(~allocMask >>> 0);
 
-  const countToGenerate = Math.min(subnetsNeeded, 4096);
+  const requestedCount =
+    mode === "subnets" ? subnetsNeededOrTargetPrefix : totalSubnets;
+  const countToGenerate = Math.min(requestedCount, 256);
   const subnets: FLSMSubnet[] = [];
   const usableHosts = computeUsableHostsV4(allocatedPrefix, subnetSize);
 
@@ -142,19 +166,63 @@ function calculateFLSMIPv4(
     family: 4,
     baseNetwork: uint32ToIPv4(networkStart),
     basePrefix: prefix,
-    subnetsNeeded,
+    subnetsNeeded:
+      mode === "subnets" ? subnetsNeededOrTargetPrefix : totalSubnets,
     borrowedBits,
     allocatedPrefix,
-    totalSubnetsCreated: subnets.length,
+    totalSubnetsCreated: totalSubnets,
     usableHostsPerSubnet: usableHosts,
     subnets,
+  };
+}
+
+function computeIPv6HostCapacity(allocatedPrefix: number): {
+  totalHostsFormatted: string;
+  usableHostsFormatted: string;
+} {
+  if (allocatedPrefix === 128) {
+    return { totalHostsFormatted: "1", usableHostsFormatted: "1" };
+  }
+  if (allocatedPrefix === 127) {
+    return { totalHostsFormatted: "2", usableHostsFormatted: "2" };
+  }
+  const hostBits = 128 - allocatedPrefix;
+  const totalBig =
+    hostBits === 128 ? (1n << 128n) - 1n : 1n << BigInt(hostBits);
+  const usableBig = totalBig - 1n; // Subtract Subnet-Router Anycast RFC 4291
+  return {
+    totalHostsFormatted: totalBig.toLocaleString(),
+    usableHostsFormatted: usableBig.toLocaleString(),
+  };
+}
+
+function computeIPv6HostRange(
+  allocatedPrefix: number,
+  subAddr: bigint,
+  lastAddr: bigint,
+): { first: string; last: string } {
+  if (allocatedPrefix === 128) {
+    const s = formatIPv6Canonical(subAddr);
+    return { first: s, last: s };
+  }
+  if (allocatedPrefix === 127) {
+    return {
+      first: formatIPv6Canonical(subAddr),
+      last: formatIPv6Canonical(lastAddr),
+    };
+  }
+  // RFC 4291 Subnet-Router Anycast is address ::0, so first usable host is +1
+  return {
+    first: formatIPv6Canonical(subAddr + 1n),
+    last: formatIPv6Canonical(lastAddr),
   };
 }
 
 function calculateFLSMIPv6(
   networkInput: string,
   prefix: number,
-  subnetsNeeded: number,
+  subnetsNeededOrTargetPrefix: number,
+  mode: "subnets" | "prefix" = "subnets",
 ): FLSMResult {
   const baseAddr = parseIPv6ToBigInt(networkInput);
   if (baseAddr === null) {
@@ -163,18 +231,39 @@ function calculateFLSMIPv6(
   if (prefix < 0 || prefix > 128) {
     throw new Error(`Prefix /${prefix} is out of range for IPv6 (0-128)`);
   }
-  if (!Number.isInteger(subnetsNeeded) || subnetsNeeded < 1) {
-    throw new Error("Number of subnets needed must be at least 1");
-  }
 
-  const borrowedBits =
-    subnetsNeeded === 1 ? 0 : Math.ceil(Math.log2(subnetsNeeded));
-  const allocatedPrefix = prefix + borrowedBits;
+  let allocatedPrefix: number;
+  let borrowedBits: number;
+  let totalSubnetsBig: bigint;
 
-  if (allocatedPrefix > 128) {
-    throw new Error(
-      `Cannot allocate ${subnetsNeeded} subnets from /${prefix}: requires /${allocatedPrefix} which exceeds 128 bits capacity`,
-    );
+  if (mode === "prefix") {
+    allocatedPrefix = subnetsNeededOrTargetPrefix;
+    if (
+      !Number.isInteger(allocatedPrefix) ||
+      allocatedPrefix < prefix ||
+      allocatedPrefix > 128
+    ) {
+      throw new Error(
+        `Target prefix /${allocatedPrefix} must be between /${prefix} and /128 for IPv6`,
+      );
+    }
+    borrowedBits = allocatedPrefix - prefix;
+    totalSubnetsBig = 1n << BigInt(borrowedBits);
+  } else {
+    const subnetsNeeded = subnetsNeededOrTargetPrefix;
+    if (!Number.isInteger(subnetsNeeded) || subnetsNeeded < 1) {
+      throw new Error("Number of subnets needed must be at least 1");
+    }
+    borrowedBits =
+      subnetsNeeded === 1 ? 0 : Math.ceil(Math.log2(subnetsNeeded));
+    allocatedPrefix = prefix + borrowedBits;
+
+    if (allocatedPrefix > 128) {
+      throw new Error(
+        `Cannot allocate ${subnetsNeeded} subnets from /${prefix}: requires /${allocatedPrefix} which exceeds 128 bits capacity`,
+      );
+    }
+    totalSubnetsBig = 1n << BigInt(borrowedBits);
   }
 
   const mask = prefixToMask128(prefix);
@@ -187,44 +276,22 @@ function calculateFLSMIPv6(
   const hostBits = 128 - allocatedPrefix;
   const stepSize = hostBits === 128 ? 1n << 128n : 1n << BigInt(hostBits);
 
-  let totalHostsFormatted: string;
-  let usableHostsFormatted: string;
+  const { totalHostsFormatted, usableHostsFormatted } =
+    computeIPv6HostCapacity(allocatedPrefix);
 
-  if (allocatedPrefix === 128) {
-    totalHostsFormatted = "1";
-    usableHostsFormatted = "1";
-  } else if (allocatedPrefix === 127) {
-    totalHostsFormatted = "2";
-    usableHostsFormatted = "2";
-  } else {
-    const totalBig =
-      hostBits === 128 ? (1n << 128n) - 1n : 1n << BigInt(hostBits);
-    const usableBig = totalBig - 1n; // Subtract Subnet-Router Anycast RFC 4291
-    totalHostsFormatted = totalBig.toLocaleString();
-    usableHostsFormatted = usableBig.toLocaleString();
-  }
-
-  const countToGenerate = Math.min(subnetsNeeded, 4096);
+  const requestedCount =
+    mode === "subnets"
+      ? subnetsNeededOrTargetPrefix
+      : totalSubnetsBig > 256n
+        ? 256
+        : Number(totalSubnetsBig);
+  const countToGenerate = Math.min(requestedCount, 256);
   const subnets: FLSMSubnet[] = [];
 
   for (let i = 0; i < countToGenerate; i++) {
     const subAddr = networkStart + BigInt(i) * stepSize;
     const lastAddr = subAddr + stepSize - 1n;
-
-    let firstHostStr: string;
-    let lastHostStr: string;
-
-    if (allocatedPrefix === 128) {
-      firstHostStr = formatIPv6Canonical(subAddr);
-      lastHostStr = firstHostStr;
-    } else if (allocatedPrefix === 127) {
-      firstHostStr = formatIPv6Canonical(subAddr);
-      lastHostStr = formatIPv6Canonical(lastAddr);
-    } else {
-      // RFC 4291 Subnet-Router Anycast is address ::0, so first usable host is +1
-      firstHostStr = formatIPv6Canonical(subAddr + 1n);
-      lastHostStr = formatIPv6Canonical(lastAddr);
-    }
+    const hostRange = computeIPv6HostRange(allocatedPrefix, subAddr, lastAddr);
 
     subnets.push({
       index: i + 1,
@@ -233,23 +300,30 @@ function calculateFLSMIPv6(
       netmask: allocMaskStr,
       wildcard: wildcardStr,
       broadcast: "N/A (Multicast RFC 4291)",
-      hostRange: {
-        first: firstHostStr,
-        last: lastHostStr,
-      },
+      hostRange,
       totalHosts: totalHostsFormatted,
       usableHosts: usableHostsFormatted,
     });
   }
 
+  const totalSubnetsFormatted =
+    totalSubnetsBig <= BigInt(Number.MAX_SAFE_INTEGER)
+      ? Number(totalSubnetsBig)
+      : totalSubnetsBig.toLocaleString();
+
   return {
     family: 6,
     baseNetwork: formatIPv6Canonical(networkStart),
     basePrefix: prefix,
-    subnetsNeeded,
+    subnetsNeeded:
+      mode === "subnets"
+        ? subnetsNeededOrTargetPrefix
+        : totalSubnetsBig <= BigInt(Number.MAX_SAFE_INTEGER)
+          ? Number(totalSubnetsBig)
+          : totalSubnetsFormatted,
     borrowedBits,
     allocatedPrefix,
-    totalSubnetsCreated: subnets.length,
+    totalSubnetsCreated: totalSubnetsFormatted,
     usableHostsPerSubnet: usableHostsFormatted,
     subnets,
   };
@@ -258,12 +332,23 @@ function calculateFLSMIPv6(
 export function calculateFLSM(
   networkInput: string,
   prefix: number,
-  subnetsNeeded: number,
+  subnetsNeededOrTargetPrefix: number,
   family?: AddressFamily,
+  mode: "subnets" | "prefix" = "subnets",
 ): FLSMResult {
   const isV6 = family === 6 || networkInput.includes(":");
   if (isV6) {
-    return calculateFLSMIPv6(networkInput, prefix, subnetsNeeded);
+    return calculateFLSMIPv6(
+      networkInput,
+      prefix,
+      subnetsNeededOrTargetPrefix,
+      mode,
+    );
   }
-  return calculateFLSMIPv4(networkInput, prefix, subnetsNeeded);
+  return calculateFLSMIPv4(
+    networkInput,
+    prefix,
+    subnetsNeededOrTargetPrefix,
+    mode,
+  );
 }

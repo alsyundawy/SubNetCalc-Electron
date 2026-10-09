@@ -1550,6 +1550,19 @@ dialog.modal-overlay::backdrop {
   width: 120px;
 }
 
+.prefix-input-wrap {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+
+.prefix-lead-slash {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--text-dim);
+}
+
 .btn-export-csv {
   background: #0369a1;
   color: #ffffff;

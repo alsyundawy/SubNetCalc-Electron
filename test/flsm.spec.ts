@@ -113,5 +113,33 @@ describe("FLSM Calculation", () => {
       );
       expect(() => calculateFLSM("2001:invalid::", 64, 4)).toThrow(/invalid/i);
     });
+
+    it("supports prefix mode: divides 2001:db8::/64 directly to /128 boundary", () => {
+      const res = calculateFLSM("2001:db8::", 64, 128, 6, "prefix");
+      expect(res.allocatedPrefix).toBe(128);
+      expect(res.borrowedBits).toBe(64);
+      expect(res.subnets[0]?.prefix).toBe(128);
+      expect(res.subnets[0]?.usableHosts).toBe("1");
+      expect(res.totalSubnetsCreated).toBe("18,446,744,073,709,551,616");
+    });
+  });
+
+  describe("IPv4 Prefix Mode FLSM", () => {
+    it("divides 192.168.1.0/24 directly to /32 host routes", () => {
+      const res = calculateFLSM("192.168.1.0", 24, 32, 4, "prefix");
+      expect(res.allocatedPrefix).toBe(32);
+      expect(res.borrowedBits).toBe(8);
+      expect(res.totalSubnetsCreated).toBe(256);
+      expect(res.subnets).toHaveLength(256);
+      expect(res.subnets[0]?.subnetId).toBe("192.168.1.0");
+      expect(res.subnets[255]?.subnetId).toBe("192.168.1.255");
+    });
+
+    it("throws error when target prefix exceeds /32 for IPv4", () => {
+      expect(() => calculateFLSM("192.168.1.0", 24, 33, 4, "prefix")).toThrow(
+        /between.*\/32/i,
+      );
+    });
   });
 });
+

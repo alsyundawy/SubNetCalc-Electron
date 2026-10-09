@@ -23,6 +23,9 @@ Version 1.1.2 ports key architectural advancements from [`SubnetCalc-MacOS`](htt
 5. **Standardized Enterprise Code Headers**: All 35 source scripts in `src/` include standardized enterprise header blocks documenting file name, version (`1.1.2`), timestamp, developer contacts, upstream lineage, and MIT licensing.
 6. **Zero Circular Dependencies (Clean DAG Architecture)**: Decoupled engine modules into a strict Directed Acyclic Graph verified by cycle detection tooling.
 7. **Dual-Stack IPv4 & IPv6 FLSM Allocation Engine (`src/engine/flsm.ts`, `src/renderer/components/FlsmView.tsx`)**: Extended Fixed Length Subnet Masking to natively support both IPv4 (/0–/32) and IPv6 (/0–/128) equal-size subnet division with 128-bit BigInt step sizes, RFC 4291 Subnet-Router Anycast compensation, RFC 5952 canonical formatting, and cross-platform CSV export.
+8. **Native Right-Click Context Menu Engine (`src/main/index.ts`)**: Integrated native OS context menu handlers on `mainWindow.webContents` delivering Undo, Redo, Cut, Copy, Paste, and Select All across all input fields, textareas, and selection states on macOS, Windows, and Linux.
+9. **Target Prefix Slider Architecture & Bidirectional Sync (`src/engine/flsm.ts`, `src/renderer/components/FlsmView.tsx`)**: Re-engineered FLSM slider from fixed subnet counts to dynamic Target Prefix (CIDR) mode. Strictly caps IPv4 to `/32` (`basePrefix` to `/32`) and enables full-range IPv6 sliding (`basePrefix` to `/128`, eliminating the `/71` cap on `/64` subnets). Features bidirectional synchronization between Target Prefix and Subnets Needed inputs, along with a performance-safe 256-subnet preview buffer.
+10. **VLSM Strict IPv4 Boundary & Clear UX Guidance (`src/renderer/components/VlsmView.tsx`)**: Reinforced IPv4 max `/32` boundary enforcement with clear UI hints `(IPv4 only: /0–/32)` and user guidance directing IPv6 subnetting to FLSM.
 
 ---
 
@@ -43,17 +46,20 @@ Every line of code across `src/engine/`, `src/main/`, `src/preload/`, `src/rende
   - Implemented boundary checks in `cloud-profile.ts` preventing shift overflows on invalid or extreme prefixes (`prefix > minimumPrefix`).
   - Added strict null guards on touch event lists (`e.touches[0]`) in `AboutModal.tsx`.
   - Implemented 128-bit BigInt arithmetic and boundary validation for IPv6 FLSM in `flsm.ts`, correctly handling /127, /128, and /0 boundaries.
-- **Evidence**: 7 test suites, 72 tests passing (100% green).
+  - Restored native clipboard context menu in Electron main process for all editable inputs and text selections.
+  - Resolved FLSM slider limitation where IPv6 `/64` was capped at `/71` by transitioning to target-prefix slider arithmetic and capping IPv4 slider strictly at `/32`.
+  - Decomposed `calculateFLSMIPv6` in `flsm.ts` into modular helpers (`computeIPv6HostCapacity`, `computeIPv6HostRange`), reducing cognitive complexity from 16 to 8.
+- **Evidence**: 7 test suites, 75 tests passing (100% green).
 
 ### 3. Syntax Review
 
 - **Audit**: Evaluated compliance with TypeScript 5.x/7.x and modern ECMAScript standards.
-- **Remediation**: Enforced strict typing, removed unneeded any-casts, verified zero syntax anomalies.
+- **Remediation**: Enforced strict typing, removed unneeded any-casts, verified zero syntax anomalies, and resolved ambiguous JSX spacing in `FlsmView.tsx`.
 - **Evidence**: `tsc --noEmit` and `oxlint src/ test/` pass with 0 errors and 0 warnings.
 
 ### 4. Runtime Review
 
-- **Audit**: Verified theme switching, modal drag event propagation, and window sizing at runtime.
+- **Audit**: Verified theme switching, modal drag event propagation, context menu popups, and window sizing at runtime.
 - **Remediation**: Drag calculations use `requestAnimationFrame`-compatible direct transforms (`translate3d(x, y, 0)`) without triggering expensive layout reflows.
 - **Evidence**: Theme transitions execute in <16ms (60+ FPS) without UI stutter.
 
@@ -172,7 +178,7 @@ Mirrored directly from `SubnetCalc-MacOS` (`ThemeManager.swift`):
 | :------------------------------- | :------------------------------------------------------------------- | :-------------------------------- |
 | **TypeScript (`tsc`)**           | Dual strict configuration (`tsconfig.json` & `tsconfig.engine.json`) | **PASSED (0 errors)**             |
 | **Oxlint**                       | High-speed Rust-based AST parser across `src/` and `test/`           | **PASSED (0 errors, 0 warnings)** |
-| **Vitest**                       | 7 test suites (72 tests) with boundary & cloud profile coverage      | **PASSED (72/72 tests green)**    |
+| **Vitest**                       | 7 test suites (75 tests) with boundary & cloud profile coverage      | **PASSED (75/75 tests green)**    |
 | **Circular Dependency Analyzer** | Full DFS cycle detection across all imports in `src/`                | **PASSED (0 cycles / Clean DAG)** |
 | **Vite Bundler**                 | Production SSR & Client bundle generation                            | **PASSED (Built in <400ms)**      |
 | **npm audit**                    | Dependency security vulnerability scanner                            | **PASSED (0 vulnerabilities)**    |

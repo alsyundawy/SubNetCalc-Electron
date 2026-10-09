@@ -21,7 +21,7 @@
  * ============================================================================
  */
 
-import { app, BrowserWindow, Menu, screen, shell } from "electron";
+import { app, BrowserWindow, Menu, MenuItem, screen, shell } from "electron";
 import path from "node:path";
 import { registerIpcHandlers } from "./ipc.js";
 import { startMemoryWatch, stopMemoryWatch } from "./memory-watch.js";
@@ -61,6 +61,29 @@ function createWindow(): void {
 
   mainWindow.once("ready-to-show", () => {
     mainWindow?.show();
+  });
+
+  // Native right-click context menu for editable inputs and selection
+  mainWindow.webContents.on("context-menu", (_event, params) => {
+    const contextMenu = new Menu();
+
+    if (params.isEditable) {
+      contextMenu.append(new MenuItem({ role: "undo", label: "Undo" }));
+      contextMenu.append(new MenuItem({ role: "redo", label: "Redo" }));
+      contextMenu.append(new MenuItem({ type: "separator" }));
+      contextMenu.append(new MenuItem({ role: "cut", label: "Cut" }));
+      contextMenu.append(new MenuItem({ role: "copy", label: "Copy" }));
+      contextMenu.append(new MenuItem({ role: "paste", label: "Paste" }));
+      contextMenu.append(new MenuItem({ type: "separator" }));
+      contextMenu.append(new MenuItem({ role: "selectAll", label: "Select All" }));
+    } else if (params.selectionText && params.selectionText.trim().length > 0) {
+      contextMenu.append(new MenuItem({ role: "copy", label: "Copy" }));
+      contextMenu.append(new MenuItem({ role: "selectAll", label: "Select All" }));
+    }
+
+    if (contextMenu.items.length > 0 && mainWindow) {
+      contextMenu.popup({ window: mainWindow });
+    }
   });
 
   // Intercept window open calls to open safe external links in default OS browser
@@ -106,7 +129,40 @@ function createWindow(): void {
 }
 
 void app.whenReady().then(() => {
-  Menu.setApplicationMenu(null);
+  if (process.platform === "darwin") {
+    const macMenuTemplate: Electron.MenuItemConstructorOptions[] = [
+      {
+        label: app.name,
+        submenu: [
+          { role: "about" },
+          { type: "separator" },
+          { role: "services" },
+          { type: "separator" },
+          { role: "hide" },
+          { role: "hideOthers" },
+          { role: "unhide" },
+          { type: "separator" },
+          { role: "quit" },
+        ],
+      },
+      {
+        label: "Edit",
+        submenu: [
+          { role: "undo" },
+          { role: "redo" },
+          { type: "separator" },
+          { role: "cut" },
+          { role: "copy" },
+          { role: "paste" },
+          { role: "selectAll" },
+        ],
+      },
+    ];
+    Menu.setApplicationMenu(Menu.buildFromTemplate(macMenuTemplate));
+  } else {
+    Menu.setApplicationMenu(null);
+  }
+
   registerIpcHandlers();
   startMemoryWatch();
   createWindow();

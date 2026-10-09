@@ -70,13 +70,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - **Zero Circular Dependencies (Pillar 9)**: Decoupled `cloud-profile.ts` and `ipv4.ts`, verifying a clean Directed Acyclic Graph (DAG) architecture across the entire codebase.
 - **Accessibility & Event Management**: Migrated dragging to unified Pointer Events and added accessible keyboard controls to `AboutModal.tsx`.
-- **Expanded Test Suite**: Added `test/cloud-profile.spec.ts` with 4 comprehensive test suites covering all 5 cloud profiles, minimum prefix boundaries, and /31-/32 edge cases, plus 6 IPv6 FLSM test suites in `test/flsm.spec.ts`. Total 72 tests passing (100% green).
+- **Expanded Test Suite**: Added `test/cloud-profile.spec.ts` with 4 comprehensive test suites covering all 5 cloud profiles, minimum prefix boundaries, and /31-/32 edge cases, plus 8 IPv6 & IPv4 FLSM test suites in `test/flsm.spec.ts`. Total 75 tests passing (100% green).
 - **CI/CD Linter Hardening**: Configured Super-Linter and MegaLinter rules with line-length suppressions and non-blocking vulnerability scanner exemptions for indirect build dependencies.
 - **CI/CD Release Asset Upload Fix**: Fixed `actions/download-artifact` flat-extraction race condition in `release-windows.yml` — installer `.exe` and `.blockmap` files were silently skipped when `download-artifact` extracted a single artifact to the root directory instead of a named subdirectory. Updated both `release-macos.yml` and `release-windows.yml` to handle flat and nested extraction with `shopt -s nullglob` and unified SHA-256 checksum consolidation.
+- **Native Right-Click Context Menu Engine (`src/main/index.ts`)**:
+  - Registered native context menu event handlers on Electron's `mainWindow.webContents` providing full Undo, Redo, Cut, Copy, Paste, and Select All across all inputs, textareas, and selection states.
+  - Standardized native macOS application Edit menu items ensuring macOS system clipboard shortcuts (`Cmd+C`, `Cmd+V`, `Cmd+X`, `Cmd+A`, `Cmd+Z`) remain continuously active.
+- **Dynamic Target Prefix Slider & Bidirectional Input in FLSM (`src/renderer/components/FlsmView.tsx`, `src/engine/flsm.ts`)**:
+  - Re-architected FLSM slider control to directly adjust Target Subnet Prefix (CIDR).
+  - Enforces strict `/32` upper bound for IPv4 (`basePrefix` to `/32`) and unrestricted `/0` to `/128` sliding for IPv6.
+  - Full bidirectional synchronization between prefix slider/stepper and subnets needed input.
+  - Performance-safe 256-subnet preview buffer with exact total count display preventing UI freezing on massive IPv6 partitions.
+- **VLSM Strict IPv4 Boundary Enforcement & Guidance (`src/renderer/components/VlsmView.tsx`)**:
+  - Added explicit `(IPv4 only: /0–/32)` label guidance and validation guards directing IPv6 subnetting to FLSM.
 
 ### Fixed
 
 - **FLSM Tab Label Accuracy** (`src/renderer/components/TabsHeader.tsx`): Renamed tab label to simply `FLSM`, removing the redundant "(Fixed)" and "(IPv4)" qualifiers since the tab now natively supports both IPv4 (1-32) and IPv6 (1-128).
+
+- **Missing Right-Click Copy/Paste on Form Inputs**: Restored native context menus across all desktop forms, textareas, and text selection in Electron main process.
+- **IPv6 FLSM Slider Capping at /71**: Fixed limitation where sliding IPv6 `/64` was capped at `/71` by switching to target prefix mode supporting `/64` to `/128` full range ($2^{64}$ subnets).
+- **IPv4 Prefix Limit Exceeded on Slider**: Strictly bound IPv4 prefix slider to `basePrefix` – `/32`, eliminating invalid `/128` ranges for IPv4.
+- **Cognitive Complexity in FLSM Engine (`src/engine/flsm.ts`)**: Modularized `computeIPv6HostCapacity` and `computeIPv6HostRange`, reducing cognitive complexity from 16 to 8.
+- **Ambiguous JSX Spacing Warning (`src/renderer/components/FlsmView.tsx`)**: Normalized trailing colon spacing after `<span>` elements.
 - **Cross-Platform CSV Filename Sanitization** (`src/renderer/components/FlsmView.tsx`): Sanitized colons (`:`) in exported IPv6 filenames to prevent illegal character errors on Windows filesystems.
 - **Hardcoded Fallback Version** (`src/renderer/App.tsx`): Corrected stale fallback `useState("1.1.0")` to `useState("1.1.2")` to display the correct version number when running in browser development mode where Electron IPC is unavailable.
 - **Duplicate File Header Blocks** (`src/engine/ipv4.ts`, `src/engine/types.ts`): Removed redundant duplicate `/* ===...=== */` header comment blocks that were erroneously prepended twice. Each file now has a single clean enterprise header with complete attribution including the `SubnetCalc-MacOS Cloud Profiles Heritage` line retained for `ipv4.ts`.
