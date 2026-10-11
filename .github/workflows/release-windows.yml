@@ -79,7 +79,7 @@ jobs:
           cat "SHA256SUMS-windows-${{ matrix.arch }}.txt" || true
 
       - name: Upload Windows Artifacts (${{ matrix.arch }})
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: subnetcalc-windows-${{ matrix.arch }}
           path: |
