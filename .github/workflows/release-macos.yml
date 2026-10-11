@@ -94,7 +94,7 @@ jobs:
           cat "SHA256SUMS-${TARGET_ARCH}.txt"
 
       - name: Upload Build Artifact (${{ matrix.arch_label }})
-        uses: actions/upload-artifact@v4.6.1
+        uses: actions/upload-artifact@v7.0.1
         with:
           name: subnetcalc-macos-${{ matrix.runs_on }}-${{ matrix.arch }}
           path: |
